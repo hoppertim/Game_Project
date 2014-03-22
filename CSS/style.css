@@ -1,0 +1,29 @@
+body{
+	background-color: #000000;
+}
+
+#game{
+	//background-color: #616789;
+	margin: auto;
+	position: relative;
+}
+
+#left_panel{
+	position: absolute;
+	background: #DBD2CB;
+	border-radius: 5px;
+}
+
+#right_panel{
+	position: absolute;
+	background: #DBD2CB;
+	border-radius: 5px;
+}
+
+#play_area{
+	background-color: #BBBBBB;
+	top: 0px;
+	left: 150px;
+	margin: auto;
+	position: absolute;
+}
