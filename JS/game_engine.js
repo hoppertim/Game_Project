@@ -1191,8 +1191,8 @@ $(document).ready(function(){
         height = 600 * sizeFactor,
         imageSize = 64,
         playAreaOffset = $('#play_area').offset(),
-        playAreaWidth = 1500,
-        playAreaHeight = 960;
+        playAreaWidth = 1200, //1500
+        playAreaHeight = 800; //960
 
     //variables used to hold information about the level
     var lvlComplete = false,
@@ -1297,7 +1297,7 @@ $(document).ready(function(){
       populateEnemies();
 
       //spawn indicated amount of enemies every x milliseconds
-      spawnEnemies(5, 5000);
+      spawnEnemies(15, 5000);
     })();
     
     //constructor functions to create a Player
@@ -1518,7 +1518,7 @@ $(document).ready(function(){
       if(player.obj.y() <= (playAreaHeight - 5 - playerHeight - player.dy) && playerY >= (5 - player.dy)){
         var diffY = player.dy * timeDiff / 20,
             ypos = playerY + diffY,
-            originalY = height/2 - 16,
+            originalY = height/2 - playerHeight/2,
             clipY,
             posY;
         if(playAreaHeight <= height || ypos <= (originalY)){
@@ -1692,7 +1692,7 @@ $(document).ready(function(){
     //populates the enemy array based on the wave(int)
     function populateEnemies(){
       var hpMultiplier = 1; //todo: make enemies have more hp based on the level
-      for(var i = 0; i < 5 * lvlNumber; ++i){
+      for(var i = 0; i < 50 * lvlNumber; ++i){
         var num = Math.random() * 2,
             type;
         if(num <= 1){
@@ -1715,10 +1715,27 @@ $(document).ready(function(){
         amount = enemies.length - index;
       }
       for(var i = 0; i < amount; ++i){
-        //todo: change the enemies starting position
-        //make random using Math.random and a list of predefined starting locations
+        var startingX, startingY;
+        if(Math.random() <= .5){
+          if(Math.random() <= .5){
+            startingX = Math.random() * 25;
+            startingY = Math.random() * playAreaHeight;
+          }else{
+            startingX = playAreaWidth - imageSize - Math.random() * 25;
+            startingY = Math.random() * playAreaHeight;
+          }
+        }else{
+          if(Math.random() <= .5){
+            startingY = Math.random() * 25;
+            startingX = Math.random() * playAreaWidth;
+          }else{
+            startingY = playAreaHeight - imageSize - Math.random() * 25;
+            startingX = Math.random() * playAreaWidth;
+          }
+        }
+
         var enemy = enemies[index++];
-        enemy.obj.x(0).y(0);
+        enemy.obj.x(startingX).y(startingY);
         foreground.add(enemy.obj);
       }
       if(index < enemies.length - 1){
