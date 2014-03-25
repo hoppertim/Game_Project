@@ -31,18 +31,29 @@ $(document).ready(function(){
   });
 
   //Load the images that will be used in the game
-  var playerImg = [new Image(), new Image(), new Image(), new Image()], //0: up, 1: left, 2: right, 3: down
-      rollerImg = [new Image(), new Image()], //0: left, 1: right
+  var playerImg = [new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
+      rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
+      gridBugImg = [new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
       wallHorizontal = new Image(),
       wallVertical = new Image(),
       backgroundPattern = new Image();
 
-  playerImg[0].src = '../IMG/p1_stand_N.png';
-  playerImg[1].src = '../IMG/p1_stand_W.png';
-  playerImg[2].src = '../IMG/p1_stand_E.png';
-  playerImg[3].src = '../IMG/p1_stand_S.png';
-  rollerImg[0].src = 'roller_L1.png'
-  rollerImg[1].src = 'roller_R1.png'
+  playerImg[0].src = '../SPRITES/PLAYER/p1_stand_N.png';
+  playerImg[1].src = '../SPRITES/PLAYER/p1_stand_W.png';
+  playerImg[2].src = '../SPRITES/PLAYER/p1_stand_E.png';
+  playerImg[3].src = '../SPRITES/PLAYER/p1_stand_S.png';
+  rollerImg[0].src = '../SPRITES/ROLLER/roller_E1.png';
+  rollerImg[1].src = '../SPRITES/ROLLER/roller_E2.png';
+  rollerImg[2].src = '../SPRITES/ROLLER/roller_W1.png';
+  rollerImg[3].src = '../SPRITES/ROLLER/roller_W2.png';
+  rollerImg[4].src = '../SPRITES/ROLLER/roller_N1.png';
+  rollerImg[5].src = '../SPRITES/ROLLER/roller_N2.png';
+  rollerImg[6].src = '../SPRITES/ROLLER/roller_S1.png';
+  rollerImg[7].src = '../SPRITES/ROLLER/roller_S2.png';
+  gridBugImg[0].src = '../SPRITES/GRIDBUG/gridbug_E1.png';
+  gridBugImg[1].src = '../SPRITES/GRIDBUG/gridbug_E2.png';
+  gridBugImg[2].src = '../SPRITES/GRIDBUG/gridbug_W1.png';
+  gridBugImg[3].src = '../SPRITES/GRIDBUG/gridbug_W2.png';
   wallHorizontal.src = '../IMG/wall_horizontal.png';
   wallVertical.src = '../IMG/wall_vertical.png';
   backgroundPattern.src = '../IMG/backgroundPattern.png';
@@ -1173,11 +1184,12 @@ $(document).ready(function(){
   /*
    * Single player game function that controls running the game
    */
-  function singlePlayerGame(player, level){
+  function singlePlayerGame(level, player, otherPlayer){
     //variables used to control the sizing of the game display
     var sizeFactor = window.innerWidth / 1366,
         width = 1000 * sizeFactor,
         height = 600 * sizeFactor,
+        imageSize = 64,
         playAreaOffset = $('#play_area').offset(),
         playAreaWidth = 1500,
         playAreaHeight = 960;
@@ -1280,15 +1292,21 @@ $(document).ready(function(){
 
       //add the layers to the stage
       stage.add(background).add(foreground).add(fogLayer);
+
+      //populate the enemies array
+      populateEnemies();
+
+      //spawn indicated amount of enemies every x milliseconds
+      spawnEnemies(5, 5000);
     })();
     
     //constructor functions to create a Player
     function createPlayer(){
       this.obj = new Kinetic.Image({
-        x: 500 * sizeFactor - 13,
-        y: 300 * sizeFactor - 16,
-        width: 26,
-        height: 32,
+        x: 500 * sizeFactor - imageSize / 2,
+        y: 300 * sizeFactor - imageSize / 2,
+        width: imageSize,
+        height: imageSize,
         image: playerImg[0]
       });
       this.aim = {
@@ -1300,6 +1318,7 @@ $(document).ready(function(){
       this.left = false;
       this.right = false;
       this.down = false;
+      this.sprint = false;
       this.direction = 'left';
       this.dx = 0;
       this.dy = 0;
@@ -1316,21 +1335,21 @@ $(document).ready(function(){
         rapidFire: false
       };
       
-      this.gun = {  //ultra gun
-        fireRate: 50,
+      this.gun = {  //machine gun
+        fireRate: 10,
         speed: 1.5,
         damage: 2,
-        spread: 9,
+        spread: 1,
         ammo: 200,
         rapidFire: true,
       }
       
       /*
-      this.gun = {  //machine gun
-        fireRate: 15,
+      this.gun = {  //ultra gun
+        fireRate: 50,
         speed: 1.5,
         damage: 2,
-        spread: 1,
+        spread: 9,
         ammo: 200,
         rapidFire: true,
       }
@@ -1362,38 +1381,52 @@ $(document).ready(function(){
     //constructor function to create enemies
     function createEnemy(type, x, y, hpMultiplier){
       switch(type){
-      case 'normal':
+      case 'gridBug':
         this.obj = new Kinetic.Image({
           x: x,
           y: y,
-          width: 20,
-          height: 20,
-          image: image1
+          width: imageSize,
+          height: imageSize,
+          image: gridBugImg[0]
         });
-        this.speed = 1;
+        this.speed = .7 + Math.random() * .5;
+        this.distanceInterval = 10;
         this.hp = 10 * hpMultiplier;
+        this.boundX = 0;
+        this.boundY = 0;
+        this.boundWidth = 0;
+        this.boundHeight = 0;
         break;
       case 'roller':
         this.obj = new Kinetic.Image({
           x: x,
           y: y,
-          width: 20,
-          height: 20,
+          width: imageSize,
+          height: imageSize,
           image: rollerImg[0]
         });
-        this.speed = 2;
+        this.speed = 1.7 + Math.random() * .6;
+        this.distanceInterval = 15;
         this.hp = 6 * hpMultiplier;
+        this.boundX = 0;
+        this.boundY = 0;
+        this.boundWidth = 0;
+        this.boundHeight = 0;
         break;
-      case 'type3':
+      case 'heavy':
         this.obj = new Kinetic.Image({
           x: x,
           y: y,
-          width: 20,
-          height: 20,
+          width: imageSize,
+          height: imageSize,
           image: image3
         });
-        this.speed = .5;
-        this.hp = 30 * hpMultiplier;
+        this.speed = .2 * Math.random() * .5;
+        this.hp = 40 * hpMultiplier;
+        this.boundX = 0;
+        this.boundY = 0;
+        this.boundWidth = 0;
+        this.boundHeight = 0;
         break;
       default:
         this.obj = new Kinetic.Rect({
@@ -1405,13 +1438,19 @@ $(document).ready(function(){
         });
         this.speed = 1;
         this.hp = 10 * hpMultiplier;
+        this.boundX = 0;
+        this.boundY = 0;
+        this.boundWidth = 0;
+        this.boundHeight = 0;
         break;
       }
+      this.type = type;
       this.dx = 0;
       this.dy = 0;
       this.direction = 'up';
       this.hit = false;
       this.imgNum = 0;
+      this.distance = 0;
     }
 
     /*
@@ -1433,6 +1472,14 @@ $(document).ready(function(){
       }
       if(player.right && !player.left){
         player.dx = 2;
+      }
+      if(player.dx && player.dy){
+        player.dx *= Math.sqrt(2)/2;
+        player.dy *= Math.sqrt(2)/2;
+      }
+      if(player.sprint){
+        player.dx *= 1.7;
+        player.dy *= 1.7;
       }
     };
 
@@ -1496,6 +1543,18 @@ $(document).ready(function(){
       }
     };
 
+    //function that updates the position of the bullets based on their current position, change of position, and timestep amount
+    function moveBullet(bullet, timeDiff){
+      bullet.obj.x(bullet.obj.x() + bullet.dx * timeDiff / 20);
+      bullet.obj.y(bullet.obj.y() + bullet.dy * timeDiff / 20);
+      if(bullet.obj.x() > (background.width() + 2) || bullet.obj.x() < (-2) || bullet.obj.y() > (background.height() + 2) || bullet.obj.y() < (-2)){
+        bullet.obj.destroy();
+        delete bullet;
+        return false;
+      }
+      return true;
+    };
+
     //function used to update the appearance of the fog based on the player's position
     function updateFog(){
       var halfFog = fogSize/2,
@@ -1553,31 +1612,31 @@ $(document).ready(function(){
       player.aim.x = evt.pageX - playAreaOffset.left + background.clipX();
       player.aim.y = evt.pageY - playAreaOffset.top + background.clipY();
       var diffX = player.aim.x - player.obj.x() - player.obj.width()/2,
-          diffY = player.aim.y - player.obj.y() - player.obj.height()/2,
-          angle = Math.atan(-diffY / diffX) / Math.PI * 180;
-      if(diffX < 0){
-        angle += 180;
-      }
-      else if(diffY > 0){
-        angle += 360;
-      }
-      if(angle > 45 && angle <= 135){
-        player.obj.image(playerImg[0]);
-        player.direction = 'up';
-      }else if(angle > 135 && angle <= 225){
-        player.obj.image(playerImg[1]);
-        player.direction = 'left';
-      }else if(angle > 225 && angle <= 315){
-        player.obj.image(playerImg[3]);
-        player.direction = 'down';
+          diffY = player.aim.y - player.obj.y() - player.obj.height()/2;
+      if(Math.abs(diffX) > Math.abs(diffY)){
+        if(diffX > 0){
+          player.direction = 'east';
+          player.obj.image(playerImg[2]);
+        }else{
+          player.direction = 'west';
+          player.obj.image(playerImg[1]);
+        }
       }else{
-        player.obj.image(playerImg[2]);
-        player.direction = 'right';
+        if(diffY < 0){
+          player.direction = 'north';
+          player.obj.image(playerImg[0]);
+        }else{
+          player.direction = 'south';
+          player.obj.image(playerImg[3]);
+        }
       }
     };
 
     //has the player shoot their equipped weapon
     function shoot(player){
+      if(player.sprint){
+        return;
+      }
       if(!player.ready && !player.pistolEquipped){
         return;
       }
@@ -1612,6 +1671,7 @@ $(document).ready(function(){
       bullet = new createBullet(playerX, playerY, dx * gun.speed, dy * gun.speed, gun.damage);
       bullets.push(bullet);
       foreground.add(bullet.obj);
+      //todo: work needs to be done to improve the spread of the bullets
       for(var i = 1; i <= (gun.spread - 1)/2; ++i){
         var skew = Math.pow((1 - .01 * i), i);
         bullet = new createBullet(playerX, playerY, (skew * dx + (1-skew) * dy) * gun.speed, (skew * dy - (1-skew) * dx) * gun.speed, gun.damage);
@@ -1627,57 +1687,131 @@ $(document).ready(function(){
     function toggleWeapon(player){
       player.pistolEquipped = !player.pistolEquipped;
       clearInterval(player.fireInterval);
-    }
-
-    //function that updates the position of the bullets based on their current position, change of position, and timestep amount
-    function moveBullet(bullet, timeDiff){
-      bullet.obj.x(bullet.obj.x() + bullet.dx * timeDiff / 20);
-      bullet.obj.y(bullet.obj.y() + bullet.dy * timeDiff / 20);
-      if(bullet.obj.x() > (background.width() + 2) || bullet.obj.x() < (-2) || bullet.obj.y() > (background.height() + 2) || bullet.obj.y() < (-2)){
-        bullet.obj.destroy();
-        delete bullet;
-        return false;
-      }
-      return true;
     };
 
-    /*
-     * Functions used to increment the state of the game and redraw the display to show the new state
-     */
-
-    //redraw function that redraws the foreground to show the current positions
-    function redraw(){
-      background.batchDraw();
-      foreground.batchDraw();
-      fogLayer.batchDraw();
-    }
-
-    //update function that updates the state of the game
-    function update(timeDiff){
-      movePlayer(player, timeDiff);
-      for(var i = 0; i < bullets.length; ++i){
-        if(!moveBullet(bullets[i], timeDiff)){
-          arrayRemove(bullets, i);
-          --i;
+    //populates the enemy array based on the wave(int)
+    function populateEnemies(){
+      var hpMultiplier = 1; //todo: make enemies have more hp based on the level
+      for(var i = 0; i < 5 * lvlNumber; ++i){
+        var num = Math.random() * 2,
+            type;
+        if(num <= 1){
+          type = 'gridBug';
+        }else if(num <= 1.5){
+          type = 'roller';
+        }else{
+          type = 'gridBug'; //todo: implement heavy enemy
         }
+        enemies.push(new createEnemy(type, -1, 0, hpMultiplier)); //-1 as the x position is used to indicate
+      }
+    };
+
+    //spawns the given amount of enemies every time interval
+    function spawnEnemies(amount, timeInterval, index){
+      if(index == undefined){
+        index = 0;
+      }
+      if(index + amount >= enemies.length){
+        amount = enemies.length - index;
+      }
+      for(var i = 0; i < amount; ++i){
+        //todo: change the enemies starting position
+        //make random using Math.random and a list of predefined starting locations
+        var enemy = enemies[index++];
+        enemy.obj.x(0).y(0);
+        foreground.add(enemy.obj);
+      }
+      if(index < enemies.length - 1){
+        setTimeout(function(){
+          spawnEnemies(amount, timeInterval, index);
+        }, timeInterval);
+      }
+    };
+
+    //calculates the location of the closest player for the indicated enemy and updates their movement
+    function closestPlayer(enemy){
+      var obj = enemy.obj,
+          x = obj.x(),
+          y = obj.y(),
+          closest = player;
+      if(otherPlayer && Math.pow(otherPlayer.obj.x() - x, 2) + Math.pow(otherPlayer.obj.y() - y, 2) < Math.pow(player.obj.x() - x, 2) + Math.pow(player.obj.y() - y, 2)){
+        closest = otherPlayer;
+      }
+      var diffX = closest.obj.x() - x,
+          diffY = closest.obj.y() - y,
+          distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+      enemy.dx = diffX / distance * enemy.speed;
+      enemy.dy = diffY / distance * enemy.speed;
+      switch(enemy.type){
+      case 'gridBug':
+        if(enemy.dy * enemy.dx > 0){
+          enemy.direction = 'east';
+        }else{
+          enemy.direction = 'west';
+        }
+        break;
+      case 'roller':
+        if(Math.abs(enemy.dx) > Math.abs(enemy.dy)){
+          if(enemy.dx > 0){
+            enemy.direction = 'east';
+          }else{
+            enemy.direction = 'west';
+          }
+        }else{
+          if(enemy.dy > 0){
+            enemy.direction = 'north';
+          }else{
+            enemy.direction = 'south';
+          }
+        }
+        break;
+      case 'heavy':
+      }
+    };
+
+    //moves the enemy based on the enemies current position, change of position, and time step amount
+    function moveEnemy(enemy, timeDiff){
+      enemy.obj.x(enemy.obj.x() + enemy.dx * timeDiff / 20);
+      enemy.obj.y(enemy.obj.y() + enemy.dy * timeDiff / 20);
+      enemy.distance += enemy.speed * timeDiff / 20;
+      if(enemy.distance > enemy.distanceInterval){
+        enemy.distance -= enemy.distanceInterval;
+
+        enemy.imgNum = (enemy.imgNum + 1) % 2;
+        updateEnemyImg(enemy);
+      }
+    };
+
+    function updateEnemyImg(enemy){
+      var imgNum = enemy.imgNum;
+      switch(enemy.direction){
+      case 'east':
+        imgNum += 0;
+        break;
+      case 'west':
+        imgNum += 2;
+        break;
+      case 'north':
+        imgNum += 4;
+        break;
+      case 'south':
+        imgNum += 6;
+        break;
+      }
+      if(enemy.hit == true){
+        imgNum += 8;
+      }
+      switch(enemy.type){
+      case 'gridBug':
+        enemy.obj.image(gridBugImg[imgNum]);
+        break;
+      case 'roller':
+        enemy.obj.image(rollerImg[imgNum]);
+        break;
+      case 'heavy':
       }
     }
-
-    //setting rate at which the update function and redraw functions are called
-    var time = new Date().getTime(),
-        dt = 1000/100, //second number is the framerate
-        accumulator = 0;
-    setInterval(function(){
-      var newTime = new Date().getTime(),
-          timeDiff = newTime - time;
-      time = newTime;
-      accumulator += timeDiff;
-      while(accumulator > dt){
-        update(dt);
-        accumulator -= dt;
-      }
-      redraw();
-    }, dt);
+    
 
     /*
      * Event controllers for the game
@@ -1737,7 +1871,12 @@ $(document).ready(function(){
       case 69:
         toggleWeapon(player);
         break;
+      case 32:
+        player.sprint = true;
+        updateMovement(player);
+        break;
       }
+
     });
 
     //keyup event is used to decrement the player movement
@@ -1759,6 +1898,10 @@ $(document).ready(function(){
         player.right = false;
         updateMovement(player);
         break;
+      case 32:
+        player.sprint = false;
+        updateMovement(player);
+        break;
       }
     });
 
@@ -1778,5 +1921,59 @@ $(document).ready(function(){
       }
       arr.length--;
     };
+
+    /*
+     * Functions used to increment the state of the game and redraw the display to show the new state
+     */
+
+    //redraw function that redraws the foreground to show the current positions
+    function redraw(){
+      background.batchDraw();
+      foreground.batchDraw();
+      fogLayer.batchDraw();
+    }
+
+    //update function that updates the state of the game
+    function update(timeDiff){
+      movePlayer(player, timeDiff);
+      for(var i = 0; i < bullets.length; ++i){
+        if(!moveBullet(bullets[i], timeDiff)){
+          arrayRemove(bullets, i);
+          --i;
+        }
+      }
+      for(var i = 0; i < enemies.length; ++i){
+        if(enemies[i]){
+          closestPlayer(enemies[i]);
+          moveEnemy(enemies[i], timeDiff);
+        }
+      }
+    }
+
+    //setting rate at which the update function and redraw functions are called
+    var time = new Date().getTime(),
+        dt = 1000/100, //second number is the framerate
+        accumulator = 0;
+    /*
+    setTimeout(function(){
+      lvlComplete = true;
+    }, 10000);
+    */
+    var gameInterval = setInterval(function(){
+      if(lvlComplete){
+        clearInterval(gameInterval);
+        console.log('level complete');
+        //call the purchase screen function to display the purchase screen
+      }
+      var newTime = new Date().getTime(),
+          timeDiff = newTime - time;
+      time = newTime;
+      accumulator += timeDiff;
+      while(accumulator > dt){
+        update(dt);
+        accumulator -= dt;
+      }
+      redraw();
+    }, dt);
   }
 });
