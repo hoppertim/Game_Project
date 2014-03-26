@@ -1,3 +1,5 @@
+//todo: purchase screen
+//todo: finish packaging all the information in a game state object
 
 $(document).ready(function(){
   //Styling the display based on the screen size of the user
@@ -32,8 +34,9 @@ $(document).ready(function(){
 
   //Load the images that will be used in the game
   var playerImg = [new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
-      rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
-      gridBugImg = [new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
+      rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
+                    new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
+      gridBugImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
       wallHorizontal = new Image(),
       wallVertical = new Image(),
       backgroundPattern = new Image();
@@ -50,10 +53,22 @@ $(document).ready(function(){
   rollerImg[5].src = '../SPRITES/ROLLER/roller_N2.png';
   rollerImg[6].src = '../SPRITES/ROLLER/roller_S1.png';
   rollerImg[7].src = '../SPRITES/ROLLER/roller_S2.png';
+  rollerImg[8].src = '../SPRITES/ROLLER/roller_E1_hit.png';
+  rollerImg[9].src = '../SPRITES/ROLLER/roller_E2_hit.png';
+  rollerImg[10].src = '../SPRITES/ROLLER/roller_W1_hit.png';
+  rollerImg[11].src = '../SPRITES/ROLLER/roller_W2_hit.png';
+  rollerImg[12].src = '../SPRITES/ROLLER/roller_N1_hit.png';
+  rollerImg[13].src = '../SPRITES/ROLLER/roller_N2_hit.png';
+  rollerImg[14].src = '../SPRITES/ROLLER/roller_S1_hit.png';
+  rollerImg[15].src = '../SPRITES/ROLLER/roller_S2_hit.png';
   gridBugImg[0].src = '../SPRITES/GRIDBUG/gridbug_E1.png';
   gridBugImg[1].src = '../SPRITES/GRIDBUG/gridbug_E2.png';
   gridBugImg[2].src = '../SPRITES/GRIDBUG/gridbug_W1.png';
   gridBugImg[3].src = '../SPRITES/GRIDBUG/gridbug_W2.png';
+  gridBugImg[4].src = '../SPRITES/GRIDBUG/gridbug_E1_hit.png';
+  gridBugImg[5].src = '../SPRITES/GRIDBUG/gridbug_E2_hit.png';
+  gridBugImg[6].src = '../SPRITES/GRIDBUG/gridbug_W1_hit.png';
+  gridBugImg[7].src = '../SPRITES/GRIDBUG/gridbug_W2_hit.png';
   wallHorizontal.src = '../IMG/wall_horizontal.png';
   wallVertical.src = '../IMG/wall_vertical.png';
   backgroundPattern.src = '../IMG/backgroundPattern.png';
@@ -453,7 +468,9 @@ $(document).ready(function(){
     });
 
     singlePlayer.on('click', function(){
-      setTimeout(singlePlayerGame, 75);
+      setTimeout(function(){
+        playGame(1, undefined);
+      }, 75);
     });
 
     twoPlayer.on('click', function(){
@@ -1184,7 +1201,16 @@ $(document).ready(function(){
   /*
    * Single player game function that controls running the game
    */
-  function singlePlayerGame(level, player, otherPlayer){
+  function playGame(numPlayers, gameState){
+    /*
+    var gamestate = {
+      lvlNumber, player, otherPlayer, turrets[], varticalWalls[[], []], horizontalWalls[[], []], cornerWalls[[], []]
+    }
+    */
+    if(!gameState){
+      gameState = {};
+    }
+
     //variables used to control the sizing of the game display
     var sizeFactor = window.innerWidth / 1366,
         width = 1000 * sizeFactor,
@@ -1197,8 +1223,8 @@ $(document).ready(function(){
     //variables used to hold information about the level
     var lvlComplete = false,
         lvlNumber = 1;
-    if(level != undefined){
-      lvlNumber = level;
+    if(gameState.lvlNumber != undefined){
+      lvlNumber = gameState.lvlNumber;
     }
     
     //variables used to control the fog that the player can see
@@ -1212,8 +1238,17 @@ $(document).ready(function(){
     var enemies = [];
         
     //arrays used for the position of the walls
-    var verticalWalls = [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [5, 5], [5, 6], [5, 7], [5, 8]],
-        horizontalWalls = [[2, 5], [3, 5], [4, 5], [5, 5]];
+    var verticalWalls, horizontalWalls, corners, walls = [];
+    if(!gameState.verticalWalls){
+      gameState.verticalWalls = [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [5, 5], [5, 6], [5, 7], [5, 8]];
+    }else{
+      gameState.verticalWalls = gameState.verticalWalls;
+    }
+    if(!gameState.horizontalWalls){
+      gameState.horizontalWalls = [[2, 5], [3, 5], [4, 5], [5, 5]];
+    }else{
+      gameState.horizontalWalls = gameState.horizontalWalls;
+    }   
 
     //styling used to hide the background image from the title screen
     $('#play_area').css({
@@ -1222,6 +1257,27 @@ $(document).ready(function(){
       'heigth': height
       //'cursor': 'url(../IMG/gunsight.png), crosshair'
     });
+    /*
+    $('#right_panel').slideUp(1000);
+    $('#play_area').animate({
+      'top': '0px',
+      'left': (200 * sizeFactor) + 'px',
+      'width': (1000 * sizeFactor) + 'px',
+      'height': (600 * sizeFactor) + 'px'
+    },{
+      'duration': 1000,
+      'queue': true
+    });
+    $('#left_panel').animate({
+      'top': (10 * sizeFactor) + 'px',
+      'left': (10 * sizeFactor) + 'px',
+      'width': (188 * sizeFactor) + 'px',
+      'height': (580 * sizeFactor) + 'px'
+    },{
+      'duration': 1000,
+      'queue': true
+    });
+    */
 
     //creates the stage to hold the how to play screen
     var stage = new Kinetic.Stage({container: 'play_area', width: 1000 * sizeFactor, height: 600 * sizeFactor});
@@ -1231,28 +1287,24 @@ $(document).ready(function(){
      */
 
     //foreground layer used to hold the player, bullets, and enemies
-    var foreground = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: 1000 * sizeFactor, height: 600 * sizeFactor}});
+    var foreground = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height: height}});
 
     //background layer used to hold the walls and background tiling
-    var background = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: 1000 * sizeFactor, height: 600 * sizeFactor}});
+    var background = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height: height}});
 
     //layer used to hold the fog
-    var fogLayer = new Kinetic.Layer({x: 0, y: 0, width: 1000 * sizeFactor, height: 600 * sizeFactor, opacity: .9});
+    var fogLayer = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height:height}, opacity: .9});
 
     /*
      * Self invoking anonymouse function used to populate the layers with the player, walls, and fog
      */
     (function(){
       //constructs the fog layer (composed of 8 different rectangles)
-      fog[0] = new Kinetic.Rect({x: 0, y: 0, height: (600 * sizeFactor - fogSize) / 2, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fog[1] = new Kinetic.Rect({x: (1000 * sizeFactor - fogSize) / 2, y: 0, height: (600 * sizeFactor - fogSize) / 2, width: fogSize, fill: '#62403A'});
-      fog[2] = new Kinetic.Rect({x: (1000 * sizeFactor + fogSize) / 2, y: 0, height: (600 * sizeFactor - fogSize) / 2, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fog[3] = new Kinetic.Rect({x: 0, y: (600 * sizeFactor - fogSize) / 2, height: fogSize, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fog[4] = new Kinetic.Rect({x: (1000 * sizeFactor + fogSize) / 2, y: (600 * sizeFactor - fogSize) / 2, height: fogSize, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fog[5] = new Kinetic.Rect({x: 0, y: (600 * sizeFactor + fogSize) / 2, height: (600 * sizeFactor - fogSize) / 2, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fog[6] = new Kinetic.Rect({x: (1000 * sizeFactor - fogSize) / 2, y: (600 * sizeFactor + fogSize) / 2, height: (600 * sizeFactor - fogSize) / 2, width: fogSize, fill: '#62403A'});
-      fog[7] = new Kinetic.Rect({x: (1000 * sizeFactor + fogSize) / 2, y: (600 * sizeFactor + fogSize) / 2, height: (600 * sizeFactor - fogSize) / 2, width: (1000 * sizeFactor - fogSize) / 2, fill: '#62403A'});
-      fogLayer.add(fog[0]).add(fog[1]).add(fog[2]).add(fog[3]).add(fog[4]).add(fog[5]).add(fog[6]).add(fog[7]);
+      fog[0] = new Kinetic.Rect({x: 0, y: 0, height: playAreaHeight, fill: '#62403A'});
+      fog[1] = new Kinetic.Rect({y: 0, height: playAreaHeight, fill: '#62403A'});
+      fog[2] = new Kinetic.Rect({y: 0, fill: '#62403A'});
+      fog[3] = new Kinetic.Rect({fill: '#62403A'});
+      fogLayer.add(fog[0]).add(fog[1]).add(fog[2]).add(fog[3]);
 
       //adds the background color and border
       var backGroundFill = new Kinetic.Rect({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, fillPatternImage: backgroundPattern, fillPatternRepeat: 'repeat' });
@@ -1261,14 +1313,16 @@ $(document).ready(function(){
       background.add(backGroundBorder);
 
       //adds the horizontal walls to the background
-      for(var i = 0; i < horizontalWalls.length; ++i){
-        var wallBlock = new Kinetic.Image({x: horizontalWalls[i][0] * 50, y: horizontalWalls[i][1] * 32, width: 50, height: 32, image: wallHorizontal});
-        background.add(wallBlock);
+      for(var i = 0; i < gameState.horizontalWalls.length; ++i){
+        walls.push(new createWall(gameState.horizontalWalls[i][0] * 50, gameState.horizontalWalls[i][1] * 32, 'horizontal'));
+        background.add(walls[walls.length - 1].obj);
       }
 
       //adds the vertical walls to the background
-      for(var i = 0; i < verticalWalls.length; ++i){
-        var wallBlock = new Kinetic.Image({x: verticalWalls[i][0] * 50 + 12, y: verticalWalls[i][1] * 32, width: 26, height: 64, image: wallVertical});
+      for(var i = 0; i < gameState.verticalWalls.length; ++i){
+        walls.push(new createWall(gameState.verticalWalls[i][0] * 50 + 12, gameState.verticalWalls[i][1] * 32, 'vertical'));
+        background.add(walls[walls.length - 1].obj);
+        
         /*
         wallBlock.on('mouseenter', function(){
           $('#play_area').css({
@@ -1281,14 +1335,23 @@ $(document).ready(function(){
           });
         });
         */
-        background.add(wallBlock);
       }
 
       //creates the player if it wasnt passed in as the argument
-      if(!player) player = new createPlayer();
+      if(!gameState.player){
+        gameState.player = new createPlayer();
+      }
 
       //add the player to the foreground
-      foreground.add(player.obj);
+      foreground.add(gameState.player.obj);
+
+      //creates the other player if it is a two player game
+      if(numPlayers == 2){
+        if(!gameState.otherPlayer){
+          gameState.otherPlayer = new createPlayer();
+        }
+        foreground.add(gameState.otherPlayer.obj);
+      }
 
       //add the layers to the stage
       stage.add(background).add(foreground).add(fogLayer);
@@ -1302,6 +1365,7 @@ $(document).ready(function(){
     
     //constructor functions to create a Player
     function createPlayer(){
+      this.type = 'player';
       this.obj = new Kinetic.Image({
         x: 500 * sizeFactor - imageSize / 2,
         y: 300 * sizeFactor - imageSize / 2,
@@ -1319,16 +1383,28 @@ $(document).ready(function(){
       this.right = false;
       this.down = false;
       this.sprint = false;
-      this.direction = 'left';
+      this.direction = 'north';
       this.dx = 0;
       this.dy = 0;
+      this.leftBound = function(){
+        return this.obj.x() + 26;
+      };
+      this.rightBound = function(){
+        return this.obj.x() + 36;
+      };
+      this.topBound = function(){
+        return this.obj.y() + 26;
+      };
+      this.bottomBound = function(){
+        return this.obj.y() + 36
+      };
       this.ready = true;
       this.fireInterval;
       this.pistolEquipped = true;
 
       this.pistol = {
         fireRate: -1,
-        speed: 1,
+        speed: 10,
         damage: 1,
         spread: 1,
         ammo: -1,
@@ -1337,36 +1413,55 @@ $(document).ready(function(){
       
       this.gun = {  //machine gun
         fireRate: 10,
-        speed: 1.5,
+        speed: 15,
         damage: 2,
         spread: 1,
         ammo: 200,
-        rapidFire: true,
+        rapidFire: true
       }
       
       /*
-      this.gun = {  //ultra gun
+      ultragun = {  //ultra gun
         fireRate: 50,
-        speed: 1.5,
+        speed: 15,
         damage: 2,
         spread: 9,
         ammo: 200,
-        rapidFire: true,
+        rapidFire: true
       }
 
-      this.gun = {  //shotgun
-        fireRate: 2,
-        speed: .5,
+      machinegun = {
+        fireRate: 10,
+        speed: 15,
         damage: 2,
-        spread: 5,
+        spread: 1,
         ammo: 200,
-        rapidFire: false,
+        rapidFire: true
+      }
+      
+      shotgun = {  //shotgun
+        fireRate: 3,
+        speed: 8,
+        damage: 2,
+        spread: 9,
+        ammo: 200,
+        rapidFire: false
       }
       */
     };
 
+    function createWall(x, y, type){
+      if(type == 'vertical'){
+        this.obj = new Kinetic.Image({x: x, y: y, width: 26, height: 64, image: wallVertical});
+      }else if(type == 'horizontal'){
+        this.obj = new Kinetic.Image({x: x, y: y, width: 50, height: 32, image: wallHorizontal});
+      }
+      this.type = 'wall';
+    };
+
     //constructor function to create the bullets
     function createBullet(xpos, ypos, dx, dy, damage){
+      this.type = 'bullet';
       this.obj = new Kinetic.Circle({
         radius: 2,
         x: xpos,
@@ -1376,7 +1471,19 @@ $(document).ready(function(){
       this.dx = dx;
       this.dy = dy;
       this.damage = damage;
-    }
+      this.leftBound = function(){
+        return this.obj.x() - 2;
+      };
+      this.rightBound = function(){
+        return this.obj.x() + 2;
+      };
+      this.topBound = function(){
+        return this.obj.y() - 2;
+      };
+      this.bottomBound = function(){
+        return this.obj.y() + 2;
+      };
+    };
 
     //constructor function to create enemies
     function createEnemy(type, x, y, hpMultiplier){
@@ -1392,10 +1499,18 @@ $(document).ready(function(){
         this.speed = .7 + Math.random() * .5;
         this.distanceInterval = 10;
         this.hp = 10 * hpMultiplier;
-        this.boundX = 0;
-        this.boundY = 0;
-        this.boundWidth = 0;
-        this.boundHeight = 0;
+        this.leftBound = function(){
+          return this.obj.x() + 23;
+        };
+        this.rightBound = function(){
+          return this.obj.x() + 39;
+        };
+        this.topBound = function(){
+          return this.obj.y() + 26;
+        };
+        this.bottomBound = function(){
+          return this.obj.y() + 37;
+        };
         break;
       case 'roller':
         this.obj = new Kinetic.Image({
@@ -1408,10 +1523,34 @@ $(document).ready(function(){
         this.speed = 1.7 + Math.random() * .6;
         this.distanceInterval = 15;
         this.hp = 6 * hpMultiplier;
-        this.boundX = 0;
-        this.boundY = 0;
-        this.boundWidth = 0;
-        this.boundHeight = 0;
+        this.leftBound = function(){
+          if(this.direction == 'north' || this.direction == 'south'){
+            return this.obj.x() + 25;
+          }else{
+            return this.obj.x() + 19;
+          }
+        };
+        this.rightBound = function(){
+          if(this.direction == 'north' || this.direction == 'south'){
+            return this.obj.x() + 38;
+          }else{
+            return this.obj.x() + 44;
+          }
+        };
+        this.topBound = function(){
+          if(this.direction == 'north' || this.direction == 'south'){
+            return this.obj.y() + 24;
+          }else{
+            return this.obj.y() + 25;
+          }
+        };
+        this.bottomBound = function(){
+          if(this.direction == 'north' || this.direction == 'south'){
+            return this.obj.y() + 38;
+          }else{
+            return this.obj.y() + 36;
+          }
+        };
         break;
       case 'heavy':
         this.obj = new Kinetic.Image({
@@ -1447,7 +1586,7 @@ $(document).ready(function(){
       this.type = type;
       this.dx = 0;
       this.dy = 0;
-      this.direction = 'up';
+      this.direction = 'north';
       this.hit = false;
       this.imgNum = 0;
       this.distance = 0;
@@ -1510,6 +1649,8 @@ $(document).ready(function(){
           player.aim.x += diffX;
         }
         player.obj.x(xpos);
+        fogLayer.x(posX);
+        fogLayer.clipX(clipX);
         foreground.x(posX);
         foreground.clipX(clipX);
         background.x(posX);
@@ -1535,6 +1676,8 @@ $(document).ready(function(){
           player.aim.y += diffY;
         }
         player.obj.y(ypos);
+        fogLayer.y(posY);
+        fogLayer.clipY(clipY);
         foreground.y(posY);
         foreground.clipY(clipY);
         background.y(posY);
@@ -1545,13 +1688,31 @@ $(document).ready(function(){
 
     //function that updates the position of the bullets based on their current position, change of position, and timestep amount
     function moveBullet(bullet, timeDiff){
-      bullet.obj.x(bullet.obj.x() + bullet.dx * timeDiff / 20);
-      bullet.obj.y(bullet.obj.y() + bullet.dy * timeDiff / 20);
+      var startX = bullet.obj.x(),
+          startY = bullet.obj.y(),
+          diffX = bullet.dx * timeDiff / 20,
+          diffY = bullet.dy * timeDiff / 20,
+          endX = startX + diffX,
+          endY = startY + diffY;
+      //while(diffX)
+      bullet.obj.x(endX);
+      bullet.obj.y(endY);
       if(bullet.obj.x() > (background.width() + 2) || bullet.obj.x() < (-2) || bullet.obj.y() > (background.height() + 2) || bullet.obj.y() < (-2)){
         bullet.obj.destroy();
-        delete bullet;
         return false;
       }
+      for(var i = 0; i < enemies.length; ++i){
+        if(checkCollision(bullet, enemies[i])){
+          bullet.obj.destroy();
+          if(enemies[i].hp <= 0){
+            enemies[i].obj.destroy();
+            arrayRemove(enemies, i);
+          }
+          return false;
+        }
+      }
+      //for enemies, for walls: checkCollisions (return true)
+      //based
       return true;
     };
 
@@ -1560,51 +1721,62 @@ $(document).ready(function(){
       var halfFog = fogSize/2,
           halfWidth = width/2,
           halfHeight = height/2,
-          left = player.obj.x() + player.obj.width()/2 - halfFog,
-          right = player.obj.x() + player.obj.width()/2 + halfFog,
-          top = player.obj.y() + player.obj.height()/2 - halfFog,
-          bottom = player.obj.y() + player.obj.height()/2 + halfFog;
+          left1,
+          right1,
+          top1,
+          bottom1,
+          left2,
+          right2,
+          top2,
+          bottom2;
+      if(numPlayers == 1){
+        left1 = gameState.player.obj.x() + gameState.player.obj.width()/2 - halfFog;
+        right1 = gameState.player.obj.x() + gameState.player.obj.width()/2 + halfFog;
+        top1 = gameState.player.obj.y() + gameState.player.obj.height()/2 - halfFog;
+        bottom1 = gameState.player.obj.y() + gameState.player.obj.height()/2 + halfFog;
+        fog[0].width(left1);
+        fog[1].x(right1).width(playAreaWidth - right1);
+        fog[2].x(left1).height(top1).width(right1 - left1);
+        fog[3].x(left1).y(bottom1).height(playAreaHeight - bottom1).width(right1 - left1);
+      }else if(numPlayers == 2){
+        left1 = gameState.player.obj.x() + gameState.player.obj.width()/2 - halfFog;
+        right1 = gameState.player.obj.x() + gameState.player.obj.width()/2 + halfFog;
+        top1 = gameState.player.obj.y() + gameState.player.obj.height()/2 - halfFog;
+        bottom1 = gameState.player.obj.y() + gameState.player.obj.height()/2 + halfFog;
+        left2 = gameState.otherPlayer.obj.x() + gameState.otherPlayer.obj.width()/2 - halfFog;
+        right2 = gameState.otherPlayer.obj.x() + gameState.otherPlayer.obj.width()/2 + halfFog;
+        top2 = gameState.otherPlayer.obj.y() + gameState.otherPlayer.obj.height()/2 - halfFog;
+        bottom2 = gameState.otherPlayer.obj.y() + gameState.otherPlayer.obj.height()/2 + halfFog;
+        if(left1 > left2){
+          var temp = left1;
+          left1 = left2;
+          left2 = temp;
+        }else{
+          var temp = right1;
+          right1 = right2;
+          right2 = temp;
+        }
+        if(top1 > top2){
+          var temp = top1;
+          top1 = top2;
+          top2 = temp;
+        }else{
+          var temp = bottom1;
+          bottom1 = bottom2;
+          bottom2 = temp;
+        }
+        if(right2 < left2){
+          fog[4].x(right2).width(left2 - right2).y(top1).height(bottom2 - top1).show();
+        }else{
+          fog[4].hide();
+        }
+        if(bottom2 < top2){
+          fog[5].x(left1).width(right2 - left1).y(bottom2).height(top2 - bottom2).show();
+        }else{
+          //todo: fog[5].hide().
+        }
+      }
       
-      if(left < 0){
-        left = 0;
-      }else if(left >= halfWidth - halfFog && left <= playAreaWidth - halfWidth - halfFog){
-        left = halfWidth - halfFog;
-      }else if(left >= playAreaWidth - halfWidth - halfFog){
-        left -= playAreaWidth - width;
-      }
-
-      if(right > playAreaWidth){
-        right = width;
-      }else if(right >= halfWidth + halfFog && right <= playAreaWidth - halfWidth + halfFog){
-        right = halfWidth + halfFog;
-      }else if(right >= playAreaWidth - halfWidth + halfFog){
-        right -= playAreaWidth - width;
-      }
-
-      if(top < 0){
-        top = 0;
-      }else if(top >= halfHeight - halfFog && top <= playAreaHeight - halfHeight - halfFog){
-        top = halfHeight - halfFog;
-      }else if(top >= playAreaHeight - halfHeight - halfFog){
-        top -= playAreaHeight - height;
-      }
-
-      if(bottom > playAreaHeight){
-        bottom = height;
-      }else if(bottom >= halfHeight + halfFog && bottom <= playAreaHeight - halfHeight + halfFog){
-        bottom = halfHeight + halfFog;
-      }else if(bottom >= playAreaHeight - halfHeight + halfFog){
-        bottom -= playAreaHeight - height;
-      }
-
-      fog[0].width(left).height(top);
-      fog[1].x(left).height(top).width(right - left);
-      fog[2].x(right).height(top).width(width - right);
-      fog[3].y(top).width(left).height(bottom - top);
-      fog[4].y(top).x(right).width(width - right).height(bottom - top);
-      fog[5].y(bottom).width(left).height(height - bottom);
-      fog[6].x(left).y(bottom).width(right - left).height(height - bottom);
-      fog[7].x(right).y(bottom).width(width - right).height(height - bottom);
     };
 
     //function used to change the players aim based on the position of the mouse
@@ -1659,8 +1831,8 @@ $(document).ready(function(){
       var diffX = player.aim.x - playerX,
           diffY = player.aim.y - playerY,
           speed = Math.sqrt(diffX * diffX + diffY * diffY),
-          dx = 10 * sizeFactor * diffX / speed,
-          dy = 10 * sizeFactor * diffY / speed,
+          dx = sizeFactor * diffX / speed,
+          dy = sizeFactor * diffY / speed,
           gun;
       if(player.pistolEquipped){
         gun = player.pistol;
@@ -1671,13 +1843,8 @@ $(document).ready(function(){
       bullet = new createBullet(playerX, playerY, dx * gun.speed, dy * gun.speed, gun.damage);
       bullets.push(bullet);
       foreground.add(bullet.obj);
-      //todo: work needs to be done to improve the spread of the bullets
-      for(var i = 1; i <= (gun.spread - 1)/2; ++i){
-        var skew = Math.pow((1 - .01 * i), i);
-        bullet = new createBullet(playerX, playerY, (skew * dx + (1-skew) * dy) * gun.speed, (skew * dy - (1-skew) * dx) * gun.speed, gun.damage);
-        bullets.push(bullet)
-        foreground.add(bullet.obj);
-        bullet = new createBullet(playerX, playerY, (skew * dx - (1-skew) * dy) * gun.speed, (skew * dy + (1-skew) * dx) * gun.speed, gun.damage);
+      for(var i = 1; i <= gun.spread - 1; ++i){
+        bullet = new createBullet(playerX, playerY, (dx * (1 - Math.random() * .2) + dy * (-.2 + Math.random() * .4)) * gun.speed, (dy * (1 - Math.random() * .2) + dx * (-.2 + Math.random() * .4)) * gun.speed, gun.damage);
         bullets.push(bullet)
         foreground.add(bullet.obj);
       }
@@ -1750,13 +1917,18 @@ $(document).ready(function(){
       var obj = enemy.obj,
           x = obj.x(),
           y = obj.y(),
-          closest = player;
-      if(otherPlayer && Math.pow(otherPlayer.obj.x() - x, 2) + Math.pow(otherPlayer.obj.y() - y, 2) < Math.pow(player.obj.x() - x, 2) + Math.pow(player.obj.y() - y, 2)){
-        closest = otherPlayer;
+          closest = gameState.player;
+      if(numPlayers == 2 && Math.pow(gameState.otherPlayer.obj.x() - x, 2) + Math.pow(gameState.otherPlayer.obj.y() - y, 2) < Math.pow(gameState.player.obj.x() - x, 2) + Math.pow(gameState.player.obj.y() - y, 2)){
+        closest = gameState.otherPlayer;
       }
       var diffX = closest.obj.x() - x,
           diffY = closest.obj.y() - y,
           distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+      if(diffX <= (fogSize + imageSize / 2) / 2 && diffX >= -(fogSize + imageSize / 2) / 2 && diffY <= (fogSize + imageSize / 2) / 2 && diffY >= -(fogSize + imageSize / 2) / 2){
+        enemy.obj.show();
+      }else{
+        enemy.obj.hide();
+      }
       enemy.dx = diffX / distance * enemy.speed;
       enemy.dy = diffY / distance * enemy.speed;
       switch(enemy.type){
@@ -1816,7 +1988,11 @@ $(document).ready(function(){
         break;
       }
       if(enemy.hit == true){
-        imgNum += 8;
+        if(enemy.type == 'gridBug'){
+          imgNum += 4;
+        }else if(enemy.type == 'roller'){
+          imgNum += 8;
+        }
       }
       switch(enemy.type){
       case 'gridBug':
@@ -1827,7 +2003,42 @@ $(document).ready(function(){
         break;
       case 'heavy':
       }
-    }
+    };
+
+    function checkCollision(obj1, obj2) {
+      if(obj1.leftBound() < obj2.rightBound()  && obj1.rightBound() > obj2.leftBound() && obj1.topBound() < obj2.bottomBound() && obj1.bottomBound() > obj2.topBound()) {
+        collideProcess(obj1, obj2);
+        return true;
+      }else {
+        return false;
+      }
+    };
+      
+    function collideProcess(obj1, obj2) {
+      var type1 = obj1.type;
+      var type2 = obj2.type;
+      if(type1 == 'gridBug' || type1 == 'roller' || type1 == 'heavy'){
+        type1 = 'enemy';
+      }
+      if(type2 == 'gridBug' || type2 == 'roller' || type2 == 'heavy'){
+        type2 = 'enemy';
+      }
+      if(type1 == "player" && type2 == "enemy"){
+        --obj1.hp;
+      }else if(type1 == "enemy" && type2 == "player"){
+        --obj2.hp;
+      }else if(type1 == "bullet" && type2 == "enemy"){
+        obj2.hp -= obj1.damage;
+        obj2.hit = true;
+      }else if(type1 == "enemy" && type2 == "bullet"){
+        obj1.hp -= obj2.damage;
+        obj1.hit = true;
+      }else if(type1 == "wall" && (type2 == "player" || type2 == "enemy" || type2 == "bullet")){
+        //do nothing
+      }else if((type1 == "player" || type1 == "enemy" || type1 == "bullet") && type2 == "wall"){
+        //do nothing
+      }
+    };
     
 
     /*
@@ -1836,61 +2047,61 @@ $(document).ready(function(){
     
     //mouse down event is used to fire a bullet
     $('#play_area').on('mousedown', function(){
-      var fireRate = player.pistolEquipped ? player.pistol.fireRate : player.gun.fireRate,
-          rapidFire = player.pistolEquipped ? player.pistol.rapidFire : player.gun.rapidFire;
+      var fireRate = gameState.player.pistolEquipped ? gameState.player.pistol.fireRate : gameState.player.gun.fireRate,
+          rapidFire = gameState.player.pistolEquipped ? gameState.player.pistol.rapidFire : gameState.player.gun.rapidFire;
       if(fireRate == -1){
-        shoot(player);
+        shoot(gameState.player);
         return;
       }
-      if(player.ready){
-        shoot(player);
-        player.ready = false;
+      if(gameState.player.ready){
+        shoot(gameState.player);
+        gameState.player.ready = false;
         setTimeout(function(){
-          player.ready = true;
+          gameState.player.ready = true;
         }, 1000 / fireRate);
       }
       if(rapidFire){
-        player.fireInterval = setInterval(function(){
-          shoot(player);
+        gameState.player.fireInterval = setInterval(function(){
+          shoot(gameState.player);
         }, 1000 / fireRate);
       }
     });
 
     //mouse up event is used to stop rapid fire
     $('#play_area').on('mouseup', function(){
-      clearInterval(player.fireInterval);
+      clearInterval(gameState.player.fireInterval);
     })
 
     //mouse move event is used to aim the gun (updates player model to show which direction the player is aiming)
     $('#play_area').on('mousemove', function(evt){
-      aim(player, evt);
+      aim(gameState.player, evt);
     })
 
     //keydown event is used to increment the player movement, toggle the weapons
     $(document).keydown( function(evt){
       switch(evt.keyCode){
       case 87: //w
-        player.up = true;
-        updateMovement(player);
+        gameState.player.up = true;
+        updateMovement(gameState.player);
         break;
       case 65: //a
-        player.left = true;
-        updateMovement(player);
+        gameState.player.left = true;
+        updateMovement(gameState.player);
         break;
       case 83: //s
-        player.down = true;
-        updateMovement(player);
+        gameState.player.down = true;
+        updateMovement(gameState.player);
         break;
       case 68: //d
-        player.right = true;
-        updateMovement(player);
+        gameState.player.right = true;
+        updateMovement(gameState.player);
         break;
       case 69:
-        toggleWeapon(player);
+        toggleWeapon(gameState.player);
         break;
       case 32:
-        player.sprint = true;
-        updateMovement(player);
+        gameState.player.sprint = true;
+        updateMovement(gameState.player);
         break;
       }
 
@@ -1900,24 +2111,24 @@ $(document).ready(function(){
     $(document).on('keyup', function(evt){
       switch(evt.keyCode){
       case 87: //w
-        player.up = false;
-        updateMovement(player);
+        gameState.player.up = false;
+        updateMovement(gameState.player);
         break;
       case 65: //a
-        player.left = false;
-        updateMovement(player);
+        gameState.player.left = false;
+        updateMovement(gameState.player);
         break;
       case 83: //s
-        player.down = false;
-        updateMovement(player);
+        gameState.player.down = false;
+        updateMovement(gameState.player);
         break;
       case 68: //d
-        player.right = false;
-        updateMovement(player);
+        gameState.player.right = false;
+        updateMovement(gameState.player);
         break;
       case 32:
-        player.sprint = false;
-        updateMovement(player);
+        gameState.player.sprint = false;
+        updateMovement(gameState.player);
         break;
       }
     });
@@ -1952,12 +2163,15 @@ $(document).ready(function(){
 
     //update function that updates the state of the game
     function update(timeDiff){
-      movePlayer(player, timeDiff);
+      movePlayer(gameState.player, timeDiff);
       for(var i = 0; i < bullets.length; ++i){
         if(!moveBullet(bullets[i], timeDiff)){
           arrayRemove(bullets, i);
           --i;
         }
+      }
+      if(enemies.length){
+        
       }
       for(var i = 0; i < enemies.length; ++i){
         if(enemies[i]){
@@ -1969,7 +2183,7 @@ $(document).ready(function(){
 
     //setting rate at which the update function and redraw functions are called
     var time = new Date().getTime(),
-        dt = 1000/100, //second number is the framerate
+        dt = 1000/100, //second number is the fps
         accumulator = 0;
     /*
     setTimeout(function(){
@@ -1992,5 +2206,12 @@ $(document).ready(function(){
       }
       redraw();
     }, dt);
-  }
+  };
+
+  /*
+   * Purchase screen function that takes in the state of the game as the argument
+   */
+  function purchaseScreen(gameState){
+
+  };
 });
