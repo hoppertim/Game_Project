@@ -15,130 +15,8 @@ from tornado.options import define, options, parse_command_line
 define("port", default=8888, help="run on the given port", type=int)
 
 
-class Client:
-    thing = "stuff"
-
-
-class Game:
-    """Structure that holds the state of a given game"""
-    """class TimerClass(threading.Thread): #This may be used for doing things in intervals, but don't know yet
-        def __init__(self):
-            threading.Thread.__init__(self)
-            self.event = threading.Event()
-
-        def run(self):
-            while not self.event.is_set():
-                Game.spawn_enemies(15, 5000, )"""
-
-    def __init__(self):
-        self.play_area = dict(width=1000, height=600)
-        self.player1 = Player()
-        self.player2 = Player()
-        self.bullets = []
-        self.enemies = []
-        self.level_complete = False
-        self.level_number = 1
-
-    def populate_enemies(self):
-        hp_multiplier = 1
-        for i in range(0, 50 * self.level_number):
-            num = random.random() * 2
-            type = None
-
-            if num <= 1:
-                self.enemies.append(GridBug(-1, 0, hp_multiplier))
-            elif num <= 1.5:
-                self.enemies.append(Roller(-1, 0, hp_multiplier))
-            else:
-                self.enemies.append(GridBug(-1, 0, hp_multiplier)) #TODO include Heavy instead
-
-    def spawn_enemies(self, amount, time_interval, index): #WTF is index?
-        if index is None:
-            index = 0
-
-        if index + amount >= len(self.enemies):
-            amount = len(self.enemies) - index
-
-        for i in amount:
-            starting_x = None
-            starting_y = None
-
-            if random.random() <= 0.5:
-                if random.random() <= 0.5:
-                    starting_x = random.random() * 25
-                    starting_y = random.random() * self.play_area['height']
-                else:
-                    starting_x = self.play_area['width'] - 1 - random.random() * 25 #1 used as placeholder for image size
-                    starting_y = random.random() * self.play_area['height']
-            else:
-                if random.random() <= 0.5:
-                    starting_x = random.random() * self.play_area['width']
-                    starting_y = random.random() * 25
-                else:
-                    starting_x = random.random() * self.play_area['width']
-                    starting_y = self.play_area['height'] - 1 - random.random() * 25 #1 used as placeholder for image size
-
-            enemy = self.enemies[index + 1]
-            index += 1
-            enemy.position['x'] = starting_x
-            enemy.position['y'] = starting_y
-
-        if index < len(self.enemies) - 1: #need a way to spawn on interval
-            things = None
-
-    def move_player(self, player, time_diff): #1's are for player width and height, since I don't know how to get those
-        player_x = player.position['x']
-        player_y = player.position['y']
-
-        if self.play_area['width'] - 5 - 1 - player.pos_change['dx'] \
-                >= player_x >= 5 - player.pos_change['dx']:
-            diff_x = player.pos_change['dx'] * time_diff / 20
-            x_pos = player_x + diff_x
-            player.position['x'] = x_pos
-
-        if self.play_area['height'] - 5 - 1 - player.pos_change['dy'] \
-                >= player_y >= 5 - player.pos_change['dy']:
-            diff_y = player.pos_change['dy'] * time_diff / 20
-            y_pos = player_y + diff_y
-            player.position['y'] = y_pos
-
-    def move_enemy(self, enemy, time_diff):
-        enemy.position['x'] += enemy.pos_change['dx'] * time_diff / 20
-        enemy.position['y'] += enemy.pos_change['dy'] * time_diff / 20
-        enemy.distance += enemy.speed * time_diff / 20
-        if enemy.distance > enemy.distance_interval:
-            enemy.distance -= enemy.distance_interval
-            enemy.img_num = (enemy.img_num + 1) % 2
-            #update_enemy_img(enemy)
-
-    def move_bullet(self, bullet, time_diff):
-        start_x = bullet.position['x']
-        start_y = bullet.position['y']
-        diff_x = bullet.pos_change['x'] * time_diff / 20
-        diff_y = bullet.pos_change['y'] * time_diff / 20
-        end_x = start_x + diff_x
-        end_y = start_y + diff_y
-
-        bullet.position['x'] = end_x
-        bullet.position['y'] = end_y
-
-        if bullet.position['x'] > self.play_area['width'] + 2 \
-                or bullet.position['x'] < -2 \
-                or bullet.position['y'] > self.play_area['height'] + 2 \
-                or bullet.position['y'] < -2:
-            self.bullets.remove(bullet)
-        else:
-            for enemy in self.enemies:
-                if self.check_collision(bullet, enemy):
-                    self.bullets.remove(bullet)
-                    if enemy.health <= 0:
-                        self.enemies.remove(enemy)
-
-    def check_collision(self, object1, object2): #TODO will impement last
-        return None
-
-    def collide_process(self, object1, object2): #TODO will implement last
-        return None
+"""class Client:
+    thing = "stuff" """
 
 
 class Player:
@@ -179,6 +57,28 @@ class Player:
             'rapid_fire': True
         }
 
+    def update_movement(self):
+        self.pos_change['dx'] = 0
+        self.pos_change['dy'] = 0
+
+        if self.up is True and self.down is not True:
+            self.pos_change['dy'] = -2
+        elif self.up is True and self.down is not True:
+            self.pos_change['dy'] = 2
+
+        if self.left is True and self.right is not True:
+            self.pos_change['dx'] = -2
+        elif self.right is True and self.left is not True:
+            self.pos_change['dx'] = 2
+
+        if self.pos_change['dx'] is not 0 and self.dy is not 0:
+            self.pos_change['dx'] *= math.sqrt(2)/2
+            self.pos_change['dy'] *= math.sqrt(2)/2
+
+        if self.sprint is True:
+            self.pos_change['dx'] *= 1.7
+            self.pos_change['dy'] *= 1.7
+
     def shoot(self, game): #1's are used again here for player width and height, for same reason as above
         if self.sprint is True \
                 or (self.ready is not True and self.pistol_equipped is not True):
@@ -195,7 +95,7 @@ class Player:
         elif self.direction is 'right':
             player_x += 10
             player_y -= 5
-        elif self.direction is 'down': #FIXME dunno if this is an error, but down was not specified before
+        elif self.direction is 'down': #FIXME dunno if this is an error, but down was not specified before. Need to implement
             player_x = player_x
             player_y = player_y
 
@@ -204,15 +104,15 @@ class Player:
         speed = math.sqrt(diff_x**2 + diff_y**2)
         dx = 1 * diff_x / speed
         dy = 1 * diff_y / speed
-        gun = None
+        equipped_gun = None
 
         if self.pistol_equipped is True:
-            gun = self.pistol
+            equipped_gun = self.pistol
         else:
-            gun = self.gun
+            equipped_gun = self.gun
 
-        bullet = Bullet(player_x, player_y, dx * gun['speed'], \
-                        dy * gun['speed'], gun['damage'])
+        bullet = Bullet(player_x, player_y, dx * equipped_gun['speed'], \
+                        dy * equipped_gun['speed'], equipped_gun['damage'])
         game.bullets.append(bullet)
 
     def toggle_weapon(self):
@@ -355,6 +255,165 @@ class Bullet:
         return self.position['y'] + 2
 
 
+class Game:
+    """Structure that holds the state of a given game"""
+    class TimerClass(threading.Thread): #This may be used for doing things in intervals, but don't know yet
+        def __init__(self):
+            threading.Thread.__init__(self)
+            self.event = threading.Event()
+
+        def run(self):
+            while not self.event.is_set():
+                pass #set some kind of interval boolean? or call timed functions?
+
+        def stop(self):
+            self.event.set()
+
+    def __init__(self):
+        self.timr = self.TimerClass()
+        self.play_area = dict(width=1000, height=600)
+        self.player1 = Player()
+        self.player2 = Player()
+        self.bullets = []
+        self.enemies = []
+        self.level_complete = False
+        self.level_number = 1
+
+    def populate_enemies(self):
+        hp_multiplier = 1
+        for i in range(0, 50 * self.level_number):
+            num = random.random() * 2
+            type = None
+
+            if num <= 1:
+                self.enemies.append(GridBug(-1, 0, hp_multiplier))
+            elif num <= 1.5:
+                self.enemies.append(Roller(-1, 0, hp_multiplier))
+            else:
+                self.enemies.append(GridBug(-1, 0, hp_multiplier)) #TODO include Heavy instead
+
+    def spawn_enemies(self, amount, time_interval, index): #WTF is index?
+        if index is None:
+            index = 0
+
+        if index + amount >= len(self.enemies):
+            amount = len(self.enemies) - index
+
+        for i in amount:
+            starting_x = None
+            starting_y = None
+
+            if random.random() <= 0.5:
+                if random.random() <= 0.5:
+                    starting_x = random.random() * 25
+                    starting_y = random.random() * self.play_area['height']
+                else:
+                    starting_x = self.play_area['width'] - 1 - random.random() * 25 #1 used as placeholder for image size
+                    starting_y = random.random() * self.play_area['height']
+            else:
+                if random.random() <= 0.5:
+                    starting_x = random.random() * self.play_area['width']
+                    starting_y = random.random() * 25
+                else:
+                    starting_x = random.random() * self.play_area['width']
+                    starting_y = self.play_area['height'] - 1 - random.random() * 25 #1 used as placeholder for image size
+
+            enemy = self.enemies[index + 1]
+            index += 1
+            enemy.position['x'] = starting_x
+            enemy.position['y'] = starting_y
+
+        if index < len(self.enemies) - 1: #need a way to spawn on interval
+            things = None
+
+    def move_player(self, player, time_diff): #1's are for player width and height, since I don't know how to get those
+        player_x = player.position['x']
+        player_y = player.position['y']
+
+        if self.play_area['width'] - 5 - 1 - player.pos_change['dx'] \
+                >= player_x >= 5 - player.pos_change['dx']:
+            diff_x = player.pos_change['dx'] * time_diff / 20
+            x_pos = player_x + diff_x
+            player.position['x'] = x_pos
+
+        if self.play_area['height'] - 5 - 1 - player.pos_change['dy'] \
+                >= player_y >= 5 - player.pos_change['dy']:
+            diff_y = player.pos_change['dy'] * time_diff / 20
+            y_pos = player_y + diff_y
+            player.position['y'] = y_pos
+
+    def move_enemy(self, enemy, time_diff):
+        enemy.position['x'] += enemy.pos_change['dx'] * time_diff / 20
+        enemy.position['y'] += enemy.pos_change['dy'] * time_diff / 20
+        enemy.distance += enemy.speed * time_diff / 20
+        if enemy.distance > enemy.distance_interval:
+            enemy.distance -= enemy.distance_interval
+            enemy.img_num = (enemy.img_num + 1) % 2
+            #TODO update_enemy_img(enemy)
+
+    def move_bullet(self, bullet, time_diff):
+        start_x = bullet.position['x']
+        start_y = bullet.position['y']
+        diff_x = bullet.pos_change['x'] * time_diff / 20
+        diff_y = bullet.pos_change['y'] * time_diff / 20
+        end_x = start_x + diff_x
+        end_y = start_y + diff_y
+
+        bullet.position['x'] = end_x
+        bullet.position['y'] = end_y
+
+        if bullet.position['x'] > self.play_area['width'] + 2 \
+                or bullet.position['x'] < -2 \
+                or bullet.position['y'] > self.play_area['height'] + 2 \
+                or bullet.position['y'] < -2:
+            self.bullets.remove(bullet)
+        else:
+            for enemy in self.enemies:
+                if self.check_collision(bullet, enemy) is True:
+                    self.bullets.remove(bullet)
+                    if enemy.health <= 0:
+                        self.enemies.remove(enemy)
+                    return False
+        return True
+
+    def check_collision(self, object1, object2):
+        if object1.left_bound() < object2.right_bound() \
+                and object1.right_bound() > object2.left_bound() \
+                and object1.top_bound() < object2.bottom_bound() \
+                and object1.bottom_bound() > object2.top_bound():
+            self.collide_process(object1, object2)
+            return True
+        else:
+            return False
+
+    def collide_process(self, object1, object2):
+        if isinstance(object1, Player) and isinstance(object2, Enemy):
+            object1.health -= 1
+        elif isinstance(object1, Enemy) and isinstance(object2, Player):
+            object2.health -= 1
+        elif isinstance(object1, Bullet) and isinstance(object2, Enemy):
+            if isinstance(object2, GridBug) or isinstance(object2, Roller) or isinstance(object2, Heavy):
+                object2.health -= object1.strength
+            object2.hit = True
+        elif isinstance(object1, Enemy) and isinstance(object2, Bullet):
+            if isinstance(object1, GridBug) or isinstance(object1, Roller) or isinstance(object1, Heavy):
+                object1.health -= object2.strength
+            object1.hit = True
+
+    def update(self, time_diff):
+        self.move_player(self.player1, time_diff)
+        self.move_player(self.player2, time_diff)
+
+        for bullet in self.bullets:
+            self.move_bullet(bullet, time_diff)
+
+        for enemy in self.enemies:
+            enemy.closest_player(self.player1, self.player2)
+            self.move_enemy(enemy, time_diff)
+            if enemy.hit is True:
+                enemy.hit = False
+
+
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(request):
@@ -364,6 +423,25 @@ class IndexHandler(tornado.web.RequestHandler):
 class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     clients = []
     game = Game()
+    game_state = dict( #don't know how JSON will encode python objects. may need to change
+        players=0,
+        player1=game.player1,
+        player2=game.player2,
+        bullets=game.bullets,
+        enemies=game.enemies,
+        playing=False,
+        in_game=False,
+        in_purchase=False,
+        level_complete=False,
+        level_number=1
+    )
+
+    initial_state_sp = dict(
+        message='singlePlayerGame',
+        game_state
+    )
+    gs_default = game_state
+
     def open(self, *args):
         print('open', 'WebSocketGameHandler')
         WebSocketGameHandler.clients.append(self)
@@ -371,27 +449,43 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         print message
 
-        if message == 'start2pGame':
-            while len(WebSocketGameHandler.clients) != 2:
-                pass #show waiting for player screen.
-            #add client to game
-            #start the game
-        elif message == "quit":
+        msg = json.loads(message)
+
+        if msg['message'] is 'singlePlayerGame':
+            self.game_state['playing']
+        """if message == 'start2pGame':
+            self.game_state['players'] += 1
+            while self.game_state['players'] != 2:
+                pass
+            self.game_state['playing'] = True
+            self.game_state['in_game'] = True
+            WebSocketGameHandler.write_message(self, self.game_state)
+        elif message == 'quit':
             print message
-            #Set the player's screen to main screen
-            #remove the player from the game
-            #reset game state to default
-        else:
+            self.game_state = self.gs_default
+        elif message == 'update': #don't know if updating the client should be handled this way
+            WebSocketGameHandler.write_message(self, self.game_state)
+        else: #main section for input event handlers in-game. need better definition of what I'm getting from the client
             msg = json.loads(message)
 
             if msg['id'] == 'inGame':
-                if msg['action'] == 'down':
+                if msg['key'] == 'keycode': #move_player and move_enemy may need to
                     if msg['playerId'] == 1:
-                        print message  #do stuff CHANGE THIS TO ACTUAL IMPLEMENTATION
+                        self.game.move_player(self.game.player1, 10) #not implementing timediff right now
+                    else:
+                        self.game.move_player(self.game.player2, 10)
+                    for enemy in self.game.enemies:
+                        enemy.closest_player(self.game.player1, self.game.player2)
+                        self.game.move_enemy(enemy, 10)
+                elif msg['action'] == 'shoot':
+                    if msg['playerId'] == 1:
+                        self.game.player1.shoot(self.game)
+                    else:
+                        self.game.player2.shoot(self.game)
             elif msg['id'] == 'inPurchaseMenu':
                 print message  #do stuff CHANGE THIS TO ACTUAL IMPLEMENTATION
             else:
-                print "Error: JSON Message ID is invalid."
+                print "Error: JSON Message ID is invalid." """
 
     def on_close(self):
         WebSocketGameHandler.clients.remove(self)
