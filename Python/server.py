@@ -10,16 +10,19 @@ import math
 import threading
 import time
 
+KEY_W = 87
+KEY_A = 65
+KEY_S = 83
+KEY_D = 68
+KEY_E = 69
+KEY_SPACE = 32
+
 from tornado.options import define, options, parse_command_line
 
 define("port", default=8888, help="run on the given port", type=int)
 
 
-"""class Client:
-    thing = "stuff" """
-
-
-class Player:
+class Player(object):
     """Structure that holds player data"""
     def __init__(self):
         self.position = dict(x=0, y=0)
@@ -38,6 +41,7 @@ class Player:
         self.ready = True
         self.fire_interval = None
         self.pistol_equipped = True
+        self.image_num = 0
 
         self.pistol = {
             'fire_rate': -1,
@@ -71,7 +75,7 @@ class Player:
         elif self.right is True and self.left is not True:
             self.pos_change['dx'] = 2
 
-        if self.pos_change['dx'] is not 0 and self.dy is not 0:
+        if self.pos_change['dx'] is not 0 and self.pos_change['dy'] is not 0:
             self.pos_change['dx'] *= math.sqrt(2)/2
             self.pos_change['dy'] *= math.sqrt(2)/2
 
@@ -79,7 +83,28 @@ class Player:
             self.pos_change['dx'] *= 1.7
             self.pos_change['dy'] *= 1.7
 
-    def shoot(self, game): #1's are used again here for player width and height, for same reason as above
+    def aim_weapon(self, x, y):
+        self.aim['x'] = x
+        self.aim['y'] = y
+        diff_x = self.aim['x'] - self.position['x']
+        diff_y = self.aim['y'] - self.position['y']
+
+        if math.fabs(diff_x) > math.fabs(diff_y):
+            if diff_x > 0:
+                self.direction = 'east'
+                self.image_num = 2
+            else:
+                self.direction = 'west'
+                self.image_num = 1
+        else:
+            if diff_y < 0:
+                self.direction = 'west'
+                self.image_num = 0
+            else:
+                self.direction = 'north'
+                self.image_num = 3
+
+    def shoot(self, game):  # 1's are used again here for player width and height, for same reason as above
         if self.sprint is True \
                 or (self.ready is not True and self.pistol_equipped is not True):
             return
@@ -95,7 +120,7 @@ class Player:
         elif self.direction is 'right':
             player_x += 10
             player_y -= 5
-        elif self.direction is 'down': #FIXME dunno if this is an error, but down was not specified before. Need to implement
+        elif self.direction is 'down':  # FIXME dunno if this is an error, but down not specified. Need to implement
             player_x = player_x
             player_y = player_y
 
@@ -111,13 +136,19 @@ class Player:
         else:
             equipped_gun = self.gun
 
-        bullet = Bullet(player_x, player_y, dx * equipped_gun['speed'], \
-                        dy * equipped_gun['speed'], equipped_gun['damage'])
+        bullet = Bullet(
+            player_x,
+            player_y,
+            dx * equipped_gun['speed'],
+            dy * equipped_gun['speed'],
+            equipped_gun['damage']
+        )
+
         game.bullets.append(bullet)
 
     def toggle_weapon(self):
         self.pistol_equipped = not self.pistol_equipped
-        #don't know if interval is relevant to this server code
+        # don't know if interval is relevant to this server code
 
     def left_bound(self):
         return self.position['x'] + 26
@@ -132,7 +163,7 @@ class Player:
         return self.position['y'] + 36
 
 
-class Enemy:
+class Enemy(object):
     """Base class for structure that holds enemy data"""
     def __init__(self):
         self.position = dict(x=0, y=0)
@@ -157,8 +188,6 @@ class Enemy:
             return player1
         else:
             return player2
-
-
 
 
 class GridBug(Enemy):
@@ -203,7 +232,7 @@ class Roller(Enemy):
             return self.position['x'] + 44
 
     def top_bound(self):
-        if Enemy.direction == 'north' or self.direction == 'south':
+        if self.direction == 'north' or self.direction == 'south':
             return self.position['x'] + 24
         else:
             return self.position['x'] + 25
@@ -220,10 +249,10 @@ class Heavy(Enemy):
     def __init__(self, hp_multiplier):
         self.health = 40 * hp_multiplier
         self.speed = 0.2 * random.random() * 0.5
-        self.distance_interval = None #TODO to be defined
+        self.distance_interval = None  # TODO to be defined
         super(Heavy, self).__init__()
 
-    def left_bound(self): #TODO to be defined
+    def left_bound(self):  # TODO to be defined
         return None
 
     def right_bound(self):
@@ -236,7 +265,7 @@ class Heavy(Enemy):
         return None
 
 
-class Bullet:
+class Bullet(object):
     def __init__(self, xpos, ypos, dx, dy, damage):
         self.position = dict(x=xpos, y=ypos)
         self.pos_change = dict(dx=dx, dy=dy)
@@ -255,9 +284,9 @@ class Bullet:
         return self.position['y'] + 2
 
 
-class Game:
+class Game(object):
     """Structure that holds the state of a given game"""
-    class TimerClass(threading.Thread): #This may be used for doing things in intervals, but don't know yet
+    """class TimerClass(threading.Thread):  # This may be used for doing things in intervals, but don't know yet
         def __init__(self):
             threading.Thread.__init__(self)
             self.event = threading.Event()
@@ -267,10 +296,9 @@ class Game:
                 pass #set some kind of interval boolean? or call timed functions?
 
         def stop(self):
-            self.event.set()
+            self.event.set()"""
 
     def __init__(self):
-        self.timr = self.TimerClass()
         self.play_area = dict(width=1000, height=600)
         self.player1 = Player()
         self.player2 = Player()
@@ -283,16 +311,15 @@ class Game:
         hp_multiplier = 1
         for i in range(0, 50 * self.level_number):
             num = random.random() * 2
-            type = None
 
             if num <= 1:
                 self.enemies.append(GridBug(-1, 0, hp_multiplier))
             elif num <= 1.5:
                 self.enemies.append(Roller(-1, 0, hp_multiplier))
             else:
-                self.enemies.append(GridBug(-1, 0, hp_multiplier)) #TODO include Heavy instead
+                self.enemies.append(GridBug(-1, 0, hp_multiplier))  # TODO include Heavy instead
 
-    def spawn_enemies(self, amount, time_interval, index): #WTF is index?
+    def spawn_enemies(self, amount, index):  # TODO Simplify this function to just spawn all enemies at once
         if index is None:
             index = 0
 
@@ -308,7 +335,7 @@ class Game:
                     starting_x = random.random() * 25
                     starting_y = random.random() * self.play_area['height']
                 else:
-                    starting_x = self.play_area['width'] - 1 - random.random() * 25 #1 used as placeholder for image size
+                    starting_x = self.play_area['width'] - 1 - random.random() * 25  # 1 is placeholder for image size
                     starting_y = random.random() * self.play_area['height']
             else:
                 if random.random() <= 0.5:
@@ -316,17 +343,14 @@ class Game:
                     starting_y = random.random() * 25
                 else:
                     starting_x = random.random() * self.play_area['width']
-                    starting_y = self.play_area['height'] - 1 - random.random() * 25 #1 used as placeholder for image size
+                    starting_y = self.play_area['height'] - 1 - random.random() * 25  # 1 is placeholder for image size
 
             enemy = self.enemies[index + 1]
             index += 1
             enemy.position['x'] = starting_x
             enemy.position['y'] = starting_y
 
-        if index < len(self.enemies) - 1: #need a way to spawn on interval
-            things = None
-
-    def move_player(self, player, time_diff): #1's are for player width and height, since I don't know how to get those
+    def move_player(self, player, time_diff):  # 1's are player width and height, since I don't know how to get those
         player_x = player.position['x']
         player_y = player.position['y']
 
@@ -349,7 +373,7 @@ class Game:
         if enemy.distance > enemy.distance_interval:
             enemy.distance -= enemy.distance_interval
             enemy.img_num = (enemy.img_num + 1) % 2
-            #TODO update_enemy_img(enemy)
+            # TODO update_enemy_img(enemy)
 
     def move_bullet(self, bullet, time_diff):
         start_x = bullet.position['x']
@@ -423,69 +447,132 @@ class IndexHandler(tornado.web.RequestHandler):
 class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     clients = []
     game = Game()
-    game_state = dict( #don't know how JSON will encode python objects. may need to change
-        players=0,
-        player1=game.player1,
-        player2=game.player2,
-        bullets=game.bullets,
-        enemies=game.enemies,
-        playing=False,
-        in_game=False,
-        in_purchase=False,
-        level_complete=False,
-        level_number=1
+    client_id = 0
+    clients_started = 0
+
+    initial_state_1p = dict(
+        message='singlePlayerGame',
+        gameState=dict(
+            player=dict(x=game.player1.position['x'], y=game.player1.position['y'])
+        )
     )
 
-    initial_state_sp = dict(
-        message='singlePlayerGame',
-        game_state
+    initial_state_2p = dict(
+        message='twoPlayerGame',
+        gameState=dict(
+            player=dict(x=game.player1.position['x'], y=game.player1.position['y']),
+            otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'])
+        )
     )
-    gs_default = game_state
+
+    update_state = dict(
+        message='updateState',
+        gameState=dict(
+            enemyData=[],
+            bulletData=[],
+            playerData=[],
+            otherPlayerData=[]
+        )
+    )
 
     def open(self, *args):
         print('open', 'WebSocketGameHandler')
         WebSocketGameHandler.clients.append(self)
+        client_id = len(WebSocketGameHandler.clients)
+        set_client_id = dict(
+            clientId=self.client_id
+        )
+        scid = json.dumps(set_client_id)
+        WebSocketGameHandler.clients[client_id].write_message(scid)
 
     def on_message(self, message):
         print message
 
-        msg = json.loads(message)
+        in_msg = json.loads(message)
 
-        if msg['message'] is 'singlePlayerGame':
-            self.game_state['playing']
-        """if message == 'start2pGame':
-            self.game_state['players'] += 1
-            while self.game_state['players'] != 2:
+        if in_msg['message'] is 'singlePlayerGame':
+            out_msg = json.dumps(self.initial_state_1p)
+            self.write_message(out_msg)
+        elif in_msg['message'] is 'twoPlayerGame':
+            self.clients_started += 1
+            while len(self.clients) != 2 and self.clients_started != 2:
                 pass
-            self.game_state['playing'] = True
-            self.game_state['in_game'] = True
-            WebSocketGameHandler.write_message(self, self.game_state)
-        elif message == 'quit':
-            print message
-            self.game_state = self.gs_default
-        elif message == 'update': #don't know if updating the client should be handled this way
-            WebSocketGameHandler.write_message(self, self.game_state)
-        else: #main section for input event handlers in-game. need better definition of what I'm getting from the client
-            msg = json.loads(message)
-
-            if msg['id'] == 'inGame':
-                if msg['key'] == 'keycode': #move_player and move_enemy may need to
-                    if msg['playerId'] == 1:
-                        self.game.move_player(self.game.player1, 10) #not implementing timediff right now
-                    else:
-                        self.game.move_player(self.game.player2, 10)
-                    for enemy in self.game.enemies:
-                        enemy.closest_player(self.game.player1, self.game.player2)
-                        self.game.move_enemy(enemy, 10)
-                elif msg['action'] == 'shoot':
-                    if msg['playerId'] == 1:
-                        self.game.player1.shoot(self.game)
-                    else:
-                        self.game.player2.shoot(self.game)
-            elif msg['id'] == 'inPurchaseMenu':
-                print message  #do stuff CHANGE THIS TO ACTUAL IMPLEMENTATION
+            out_msg = json.dumps(self.initial_state_2p)
+            self.write_message(out_msg)
+        elif in_msg['message'] is 'mousedown':
+            if in_msg['client_id'] is 1:
+                self.game.player1.shoot(self.game)
             else:
-                print "Error: JSON Message ID is invalid." """
+                self.game.player2.shoot(self.game)
+        elif in_msg['message'] is 'mouseup':
+            pass
+        elif in_msg['message'] is 'mousemove':
+            if in_msg['client_id'] is 1:
+                self.game.player1.aim_weapon(in_msg['x'], in_msg['y'])
+            elif in_msg['client_id'] is 2:
+                self.game.player2.aim_weapon(in_msg['x'], in_msg['y'])
+        elif in_msg['message'] is 'keydown':
+            if in_msg['client_id'] is 1:
+                if in_msg['key_code'] is KEY_W:
+                    self.game.player1.up = True
+                elif in_msg['key_code'] is KEY_A:
+                    self.game.player1.left = True
+                elif in_msg['key_code'] is KEY_S:
+                    self.game.player1.down = True
+                elif in_msg['key_code'] is KEY_D:
+                    self.game.player1.right = True
+                elif in_msg['key_code'] is KEY_E:
+                    if self.game.player1.pistol_equipped is True:
+                        self.game.player1.pistol_equipped = False
+                    else:
+                        self.game.player1.pistol_equipped = True
+                elif in_msg['key_code'] is KEY_SPACE:
+                    self.game.player1.sprint = True
+            elif in_msg['client_id'] is 2:
+                if in_msg['key_code'] is KEY_W:
+                    self.game.player2.up = True
+                elif in_msg['key_code'] is KEY_A:
+                    self.game.player2.left = True
+                elif in_msg['key_code'] is KEY_S:
+                    self.game.player2.down = True
+                elif in_msg['key_code'] is KEY_D:
+                    self.game.player2.right = True
+                elif in_msg['key_code'] is KEY_E:
+                    if self.game.player2.pistol_equipped is True:
+                        self.game.player2.pistol_equipped = False
+                    else:
+                        self.game.player2.pistol_equipped = True
+                elif in_msg['key_code'] is KEY_SPACE:
+                    self.game.player2.sprint = True
+        elif in_msg['message'] is 'keyup':
+            if in_msg['client_id'] is 1:
+                if in_msg['key_code'] is KEY_W:
+                    self.game.player1.up = False
+                elif in_msg['key_code'] is KEY_A:
+                    self.game.player1.left = False
+                elif in_msg['key_code'] is KEY_S:
+                    self.game.player1.down = False
+                elif in_msg['key_code'] is KEY_D:
+                    self.game.player1.right = False
+                elif in_msg['key_code'] is KEY_SPACE:
+                    self.game.player1.sprint = False
+            elif in_msg['client_id'] is 2:
+                if in_msg['key_code'] is KEY_W:
+                    self.game.player2.up = False
+                elif in_msg['key_code'] is KEY_A:
+                    self.game.player2.left = False
+                elif in_msg['key_code'] is KEY_S:
+                    self.game.player2.down = False
+                elif in_msg['key_code'] is KEY_D:
+                    self.game.player2.right = False
+                elif in_msg['key_code'] is KEY_SPACE:
+                    self.game.player2.sprint = False
+        elif in_msg['message'] is 'update': # TODO finish
+            pass
+            #fill update_state dictionary with current state
+            #send current state to client
+            #update current state
+
 
     def on_close(self):
         WebSocketGameHandler.clients.remove(self)
@@ -494,7 +581,7 @@ settings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static')
 }
 
-app = tornado.web.Application([ #all StaticFileHandler stuff will need to be accessed via URL from the HTML
+app = tornado.web.Application([  # all StaticFileHandler stuff will need to be accessed via URL from the HTML
     (r'/game', WebSocketGameHandler),
     (r'/', IndexHandler),
     (r'/JS/(jquery-2\.1\.0\.min\.js)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
@@ -503,8 +590,25 @@ app = tornado.web.Application([ #all StaticFileHandler stuff will need to be acc
     (r'/CSS/(main\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
     (r'/CSS/(normalize\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
     (r'/CSS/(style\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    # create static paths to all images as well
 ], **settings)
 
+# Possible alternate solution to app instantiation:
+"""
+handlers = [
+    (r'/game', WebSocketGameHandler),
+    (r'/', IndexHandler),
+    (r'/JS/(jquery-2\.1\.0\.min\.js)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    (r'/JS/(kinetic-v5\.0\.1\.min\.js)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    (r'/JS/(underscore-min\.js)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    (r'/CSS/(main\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    (r'/CSS/(normalize\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path'])),
+    (r'/CSS/(style\.css)', tornado.web.StaticFileHandler, dict(path=settings['static_path']))
+    # static paths for images
+]
+
+app = tornado.web.Application(handlers)
+"""
 if __name__ == '__main__':
     parse_command_line()
     app.listen(options.port)
