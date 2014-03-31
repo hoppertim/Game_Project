@@ -14,39 +14,39 @@ $(document).ready(function(){
       wallVertical = new Image(),
       backgroundPattern = new Image();
 
-  playerImg[0].src = '../SPRITES/PLAYER/p1_stand_N.png';
-  playerImg[1].src = '../SPRITES/PLAYER/p1_stand_W.png';
-  playerImg[2].src = '../SPRITES/PLAYER/p1_stand_E.png';
-  playerImg[3].src = '../SPRITES/PLAYER/p1_stand_S.png';
-  rollerImg[0].src = '../SPRITES/ROLLER/roller_E1.png';
-  rollerImg[1].src = '../SPRITES/ROLLER/roller_E2.png';
-  rollerImg[2].src = '../SPRITES/ROLLER/roller_W1.png';
-  rollerImg[3].src = '../SPRITES/ROLLER/roller_W2.png';
-  rollerImg[4].src = '../SPRITES/ROLLER/roller_N1.png';
-  rollerImg[5].src = '../SPRITES/ROLLER/roller_N2.png';
-  rollerImg[6].src = '../SPRITES/ROLLER/roller_S1.png';
-  rollerImg[7].src = '../SPRITES/ROLLER/roller_S2.png';
-  rollerImg[8].src = '../SPRITES/ROLLER/roller_E1_hit.png';
-  rollerImg[9].src = '../SPRITES/ROLLER/roller_E2_hit.png';
-  rollerImg[10].src = '../SPRITES/ROLLER/roller_W1_hit.png';
-  rollerImg[11].src = '../SPRITES/ROLLER/roller_W2_hit.png';
-  rollerImg[12].src = '../SPRITES/ROLLER/roller_N1_hit.png';
-  rollerImg[13].src = '../SPRITES/ROLLER/roller_N2_hit.png';
-  rollerImg[14].src = '../SPRITES/ROLLER/roller_S1_hit.png';
-  rollerImg[15].src = '../SPRITES/ROLLER/roller_S2_hit.png';
-  gridBugImg[0].src = '../SPRITES/GRIDBUG/gridbug_E1.png';
-  gridBugImg[1].src = '../SPRITES/GRIDBUG/gridbug_E2.png';
-  gridBugImg[2].src = '../SPRITES/GRIDBUG/gridbug_W1.png';
-  gridBugImg[3].src = '../SPRITES/GRIDBUG/gridbug_W2.png';
-  gridBugImg[4].src = '../SPRITES/GRIDBUG/gridbug_E1_hit.png';
-  gridBugImg[5].src = '../SPRITES/GRIDBUG/gridbug_E2_hit.png';
-  gridBugImg[6].src = '../SPRITES/GRIDBUG/gridbug_W1_hit.png';
-  gridBugImg[7].src = '../SPRITES/GRIDBUG/gridbug_W2_hit.png';
-  wallHorizontal.src = '../IMG/wall_horizontal.png';
-  wallVertical.src = '../IMG/wall_vertical.png';
-  backgroundPattern.src = '../IMG/backgroundPattern.png';
+  playerImg[0].src = "staticf/SPRITES/PLAYER/p1_stand_N.png')";
+  playerImg[1].src = "static/SPRITES/PLAYER/p1_stand_W.png')";
+  playerImg[2].src = "static/SPRITES/PLAYER/p1_stand_E.png')";
+  playerImg[3].src = "static/SPRITES/PLAYER/p1_stand_S.png')";
+  rollerImg[0].src = "static/SPRITES/ROLLER/roller_E1.png')";
+  rollerImg[1].src = "static/SPRITES/ROLLER/roller_E2.png')";
+  rollerImg[2].src = "static/SPRITES/ROLLER/roller_W1.png')";
+  rollerImg[3].src = "static/SPRITES/ROLLER/roller_W2.png')";
+  rollerImg[4].src = "static/SPRITES/ROLLER/roller_N1.png')";
+  rollerImg[5].src = "static/SPRITES/ROLLER/roller_N2.png')";
+  rollerImg[6].src = "static/SPRITES/ROLLER/roller_S1.png')";
+  rollerImg[7].src = "static/SPRITES/ROLLER/roller_S2.png')";
+  rollerImg[8].src = "static/SPRITES/ROLLER/roller_E1_hit.png')";
+  rollerImg[9].src = "static/SPRITES/ROLLER/roller_E2_hit.png')";
+  rollerImg[10].src = "static/SPRITES/ROLLER/roller_W1_hit.png')";
+  rollerImg[11].src = "static/SPRITES/ROLLER/roller_W2_hit.png')";
+  rollerImg[12].src = "static/SPRITES/ROLLER/roller_N1_hit.png')";
+  rollerImg[13].src = "static/SPRITES/ROLLER/roller_N2_hit.png')";
+  rollerImg[14].src = "static/SPRITES/ROLLER/roller_S1_hit.png')";
+  rollerImg[15].src = "static/SPRITES/ROLLER/roller_S2_hit.png')";
+  gridBugImg[0].src = "static/SPRITES/GRIDBUG/gridbug_E1.png')";
+  gridBugImg[1].src = "static/SPRITES/GRIDBUG/gridbug_E2.png')";
+  gridBugImg[2].src = "static/SPRITES/GRIDBUG/gridbug_W1.png')";
+  gridBugImg[3].src = "static/SPRITES/GRIDBUG/gridbug_W2.png')";
+  gridBugImg[4].src = "static/SPRITES/GRIDBUG/gridbug_E1_hit.png')";
+  gridBugImg[5].src = "static/SPRITES/GRIDBUG/gridbug_E2_hit.png')";
+  gridBugImg[6].src = "static/SPRITES/GRIDBUG/gridbug_W1_hit.png')";
+  gridBugImg[7].src = "static/SPRITES/GRIDBUG/gridbug_W2_hit.png')";
+  wallHorizontal.src = "static/IMG/wall_horizontal.png')";
+  wallVertical.src = "static/IMG/wall_vertical.png')";
+  backgroundPattern.src = "static/IMG/backgroundPattern.png')";
 
-  var ws = new WebSocket('ws://' + document.location.host + '/ws');
+  var ws = new WebSocket('ws://' + document.location.host + '/game');
 
   ws.onerror = function(){
     console.log('unable to open connection');
@@ -78,7 +78,7 @@ $(document).ready(function(){
       'left': (150 * sizeFactor) + 'px',
       'width': (1000 * sizeFactor) + 'px',
       'height': height + 'px',
-      'backgroundImage': 'url("../IMG/background.jpg")',
+      'backgroundImage': 'url("static/IMG/background.jpg")',
       'backgroundSize' : (1000 * sizeFactor) + 'px ' + (600 * sizeFactor) + 'px',
       'backgroundRepeat': 'no-repeat'
     });
@@ -89,7 +89,7 @@ $(document).ready(function(){
   function displayTitle() {
     $('title').text('Main Menu');
     $('#play_area').css({
-      'backgroundImage': 'url("../IMG/background.jpg")'
+      'backgroundImage': 'url(static/IMG/background.jpg")'
     });
     var sizeFactor =  window.innerWidth / 1366;
 
@@ -480,34 +480,40 @@ $(document).ready(function(){
     ws.onmessage = function(data){
       console.log(data);
       clientId = data.clientId;
-      var message = data.message;
-      if(message == 'singlePlayerGame'){
-        var gameState = data.gameState,
-            numPlayers = 1;
-        playGame(numPlayers, gameState);
-      }else if(message == 'twoPlayerGame'){
-        var gameState = data.gameState,
-            numPlayers = 2;
-        playGame(numPlayers, gameState);
+      if(message){
+        var message = data.message;
+        if(message == 'singlePlayerGame'){
+          var gameState = data.gameState,
+              numPlayers = 1;
+          playGame(numPlayers, gameState);
+        }else if(message == 'twoPlayerGame'){
+          var gameState = data.gameState,
+              numPlayers = 2;
+          playGame(numPlayers, gameState);
+        }
       }
     };
 
     singlePlayer.on('click', function(){
       var data = {
+        'clientId': clientId,
         'message': 'singlePlayerGame'
       };
       setTimeout(function(){
         ws.send(data);
       }, 75);
+      console.log(data);
     });
 
     twoPlayer.on('click', function(){
       setTimeout(function(){
         var data = {
+          'clientId': clientId,
           'message': 'twoPlayerGame'
         };
         ws.send(data);
       }, 75);
+      console.log(data);
     });
 
     howToPlay.on('click', function(){
@@ -518,7 +524,7 @@ $(document).ready(function(){
   function displayHowToPlay(){
     $('title').text('How to Play');
     $('#play_area').css({
-      'backgroundImage': 'url("../IMG/background.jpg")'
+      'backgroundImage': 'url("static/IMG/background.jpg")'
     });
 
     var sizeFactor = window.innerWidth / 1366;
@@ -1283,6 +1289,9 @@ $(document).ready(function(){
 
     //foreground layer used to hold the player, bullets, and enemies
     var foreground = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height: height}});
+    var bulletGroup = new Kinetic.Group({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight});
+    var enemyGroup = new Kinetic.Group({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight});
+    foreground.add(bulletGroup).add(enemyGroup);
 
     //background layer used to hold the walls and background tiling
     var background = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height: height}});
@@ -1654,19 +1663,11 @@ $(document).ready(function(){
           updatePlayer(otherPlayerData, otherPlayer);
         }
         updateFog();
-        for(var i = enemies.length - 1; i >= 0; ++i){
-          enemies[i].obj.destroy();
-          enemies.pop();
-        }
-        for(var i = bullets.length - 1; i >= 0; ++i){
-          bullets[i].obj.destroy();
-          bullets.pop();
-        }
+        bulletGroup.destroyChildren();
+        enemyGroup.destroyChildren();
         for(var i = 0; i < enemyData.length; ++i){
           var enemy = new createEnemy(enemyData[i].x, enemyData[i].y, enemyData[i].type, enemyData[i].imgNum);
-          foreground.add(enemy.obj);
-          enemies.push(enemy);
-
+          enemyGroup.add(enemy.obj);
         }
         for(var i = 0; i < bulletData.length; ++i){
           var bullet = new Kinetic.Circle({
@@ -1675,8 +1676,7 @@ $(document).ready(function(){
             y: bulletData[i].y,
             fill: '#7FFF00'
           });
-          foreground.add(bullet);
-          bullets.push(bullet);
+          bulletGroup.add(bullet);
         }
         redraw();
       }
