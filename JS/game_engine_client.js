@@ -2,6 +2,9 @@
 //todo: finish packaging all the information in a game state object
 
 $(document).ready(function(){
+  //variable to store the id of the client
+  var clientId;
+
   //Load the images that will be used in the game
   var playerImg = [new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
       rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
@@ -475,6 +478,8 @@ $(document).ready(function(){
     });
 
     ws.onmessage = function(data){
+      console.log(data);
+      clientId = data.clientId;
       var message = data.message;
       if(message == 'singlePlayerGame'){
         var gameState = data.gameState,
@@ -488,18 +493,20 @@ $(document).ready(function(){
     };
 
     singlePlayer.on('click', function(){
+      var data = {
+        'message': 'singlePlayerGame'
+      };
       setTimeout(function(){
-        ws.send({
-          'message': 'singlePlayerGame'
-        });
+        ws.send(data);
       }, 75);
     });
 
     twoPlayer.on('click', function(){
       setTimeout(function(){
-        ws.send({
+        var data = {
           'message': 'twoPlayerGame'
-        });
+        };
+        ws.send(data);
       }, 75);
     });
 
@@ -1575,41 +1582,51 @@ $(document).ready(function(){
     
     //mouse down event is used to fire a bullet
     $('#play_area').on('mousedown', function(){
-      ws.send({
+      var data = {
+        'clientId': clientId,
         'message': 'mousedown'
-      });
+      };
+      ws.send(data);
     });
 
     //mouse up event is used to stop rapid fire
     $('#play_area').on('mouseup', function(){
-      ws.send({
+      var data = {
+        'clientId': clientId,
         'message': 'mouseup'
-      })
+      };
+      ws.send(data);
     })
 
     //mouse move event is used to aim the gun (updates player model to show which direction the player is aiming)
     $('#play_area').on('mousemove', function(evt){
-      ws.send({
+      var data  = {
+        'clientId': clientId,
         'message': 'mousemove',
         'x': evt.pageX - playAreaOffset.left + background.clipX(),
         'y': evt.pageY - playAreaOffset.top + background.clipY()
-      });
+      };
+      ws.send(data);
     })
 
     //keydown event is used to increment the player movement, toggle the weapons
     $(document).keydown( function(evt){
-      ws.send({
+      var data = {
+        'clientId': clientId,
         'message': 'keydown',
         'keycode': evt.keyCode
-      });
+      };
+      ws.send(data);
     });
 
     //keyup event is used to decrement the player movement
     $(document).on('keyup', function(evt){
-      ws.send({
+      var data = {
+        'clientId': clientId,
         'message': 'keyup',
         'keycode': evt.keycode
-      });
+      };
+      ws.send(data);
     });
 
     /*
@@ -1624,6 +1641,7 @@ $(document).ready(function(){
     }
 
     ws.onmessage = function(data){
+      console.log('update');
       if(data.message == 'updateState'){
         var gameState = data.gameState,
             enemyData = gameState.enemyData,
