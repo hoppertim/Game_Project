@@ -89,7 +89,7 @@ $(document).ready(function(){
   function displayTitle() {
     $('title').text('Main Menu');
     $('#play_area').css({
-      'backgroundImage': 'url(static/IMG/background.jpg")'
+      'backgroundImage': 'url("static/IMG/background.jpg")'
     });
     var sizeFactor =  window.innerWidth / 1366;
 
@@ -477,7 +477,8 @@ $(document).ready(function(){
       foreground.batchDraw();
     });
 
-    ws.onmessage = function(data){
+    ws.onmessage = function(msg){
+      var data = JSON.parse(msg.data);
       console.log(data);
       clientId = data.clientId;
       if(message){
@@ -495,10 +496,10 @@ $(document).ready(function(){
     };
 
     singlePlayer.on('click', function(){
-      var data = {
+      var data = JSON.stringify({
         'clientId': clientId,
         'message': 'singlePlayerGame'
-      };
+      });
       setTimeout(function(){
         ws.send(data);
       }, 75);
@@ -507,10 +508,10 @@ $(document).ready(function(){
 
     twoPlayer.on('click', function(){
       setTimeout(function(){
-        var data = {
+        var data = JSON.stringify({
           'clientId': clientId,
           'message': 'twoPlayerGame'
-        };
+        });
         ws.send(data);
       }, 75);
       console.log(data);
@@ -1591,50 +1592,50 @@ $(document).ready(function(){
     
     //mouse down event is used to fire a bullet
     $('#play_area').on('mousedown', function(){
-      var data = {
+      var data = JSON.stringify({
         'clientId': clientId,
         'message': 'mousedown'
-      };
+      });
       ws.send(data);
     });
 
     //mouse up event is used to stop rapid fire
     $('#play_area').on('mouseup', function(){
-      var data = {
+      var data = JSON.stringify({
         'clientId': clientId,
         'message': 'mouseup'
-      };
+      });
       ws.send(data);
     })
 
     //mouse move event is used to aim the gun (updates player model to show which direction the player is aiming)
     $('#play_area').on('mousemove', function(evt){
-      var data  = {
+      var data  = JSON.stringify({
         'clientId': clientId,
         'message': 'mousemove',
         'x': evt.pageX - playAreaOffset.left + background.clipX(),
         'y': evt.pageY - playAreaOffset.top + background.clipY()
-      };
+      });
       ws.send(data);
     })
 
     //keydown event is used to increment the player movement, toggle the weapons
     $(document).keydown( function(evt){
-      var data = {
+      var data = JSON.stringify({
         'clientId': clientId,
         'message': 'keydown',
         'keycode': evt.keyCode
-      };
+      });
       ws.send(data);
     });
 
     //keyup event is used to decrement the player movement
     $(document).on('keyup', function(evt){
-      var data = {
+      var data = JSON.stringify({
         'clientId': clientId,
         'message': 'keyup',
         'keycode': evt.keycode
-      };
+      });
       ws.send(data);
     });
 
@@ -1649,7 +1650,8 @@ $(document).ready(function(){
       fogLayer.batchDraw();
     }
 
-    ws.onmessage = function(data){
+    ws.onmessage = function(msg){
+      var data = JSON.parse(msg.data);
       console.log('update');
       if(data.message == 'updateState'){
         var gameState = data.gameState,
