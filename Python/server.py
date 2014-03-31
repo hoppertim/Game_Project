@@ -7,7 +7,6 @@ import json
 import os
 import random
 import math
-import datetime
 
 KEY_W = 87
 KEY_A = 65
@@ -227,6 +226,8 @@ class GridBug(Enemy):
 class Roller(Enemy):
     """Derived class that holds data for roller enemies"""
     def __init__(self, x, y, hp_multiplier):
+        self.position['x'] = x
+        self.position['y'] = y
         self.health = 6 * hp_multiplier
         self.speed = 1.7 * random.random() * 0.6
         self.distance_interval = 15
@@ -272,7 +273,9 @@ class Roller(Enemy):
 
 class Heavy(Enemy):
     """Derived class that holds data for heavy enemies"""
-    def __init__(self, hp_multiplier):
+    def __init__(self, x, y, hp_multiplier):
+        self.position['x'] = x
+        self.position['y'] = y
         self.health = 40 * hp_multiplier
         self.speed = 0.2 * random.random() * 0.5
         self.distance_interval = None  # TODO to be defined
@@ -451,49 +454,50 @@ class IndexHandler(tornado.web.RequestHandler):
     def get(request):
         request.render('index.html')
 
-
+clients = []
 class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
-    clients = []
-    game = Game()
-    client_id = 0
-    clients_started = 0
-    update_loop = None
-
-    initial_state_1p = dict(
-        message='singlePlayerGame',
-        gameState=dict(
-            player=dict(x=game.player1.position['x'], y=game.player1.position['y'])
+    def __init__(self, application, request, **kwargs):
+        super(WebSocketGameHandler, self).__init__(application, request, **kwargs)
+        #self.clients = []
+        self.game = Game()
+        self.client_id = 0
+        self.clients_started = 0
+        self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, 20)
+        self.initial_state_1p = dict(
+            message='singlePlayerGame',
+            gameState=dict(
+                player=dict(x=self.game.player1.position['x'], y=self.game.player1.position['y'])
+            )
         )
-    )
-
-    initial_state_2p = dict(
-        message='twoPlayerGame',
-        gameState=dict(
-            player=dict(x=game.player1.position['x'], y=game.player1.position['y']),
-            otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'])
+        self.initial_state_2p = dict(
+            message='twoPlayerGame',
+            gameState=dict(
+                player=dict(x=self.game.player1.position['x'], y=self.game.player1.position['y']),
+                otherPlayer=dict(x=self.game.player2.position['x'], y=self.game.player2.position['y'])
+            )
         )
-    )
-
-    update_state = dict(
-        message='updateState',
-        gameState=dict(
-            enemyData=[],
-            bulletData=[],
-            playerData=dict(x=0, y=0, imgNum=0),
-            otherPlayerData=dict(x=0, y=0, imgNum=0)
+        self.update_state = dict(
+            message='updateState',
+            gameState=dict(
+                enemyData=[],
+                bulletData=[],
+                playerData=dict(x=0, y=0, imgNum=0),
+                otherPlayerData=dict(x=0, y=0, imgNum=0)
+            )
         )
-    )
 
     def open(self, *args):
         print('open', 'WebSocketGameHandler')
-        WebSocketGameHandler.clients.append(self)
-        client_id = len(WebSocketGameHandler.clients)
+        print len(clients)
+        print clients
+        clients.append(self)
+        print clients
+        self.client_id = len(clients)
         set_client_id = dict(
             clientID=self.client_id
         )
         scid = json.dumps(set_client_id)
-        WebSocketGameHandler.clients[client_id].write_message(scid)
-        self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, datetime.timedelta(milliseconds=20))
+        clients[self.client_id-1].write_message(scid)
 
     def on_message(self, message):
         print message
@@ -505,7 +509,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             self.write_message(out_msg)
         elif in_msg['message'] is 'twoPlayerGame':
             self.clients_started += 1
-            while len(self.clients) != 2 and self.clients_started != 2:
+            while len(clients) != 2 and self.clients_started != 2:
                 pass
             out_msg = json.dumps(self.initial_state_2p)
             self.write_message(out_msg)
@@ -580,7 +584,8 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                     self.game.player2.sprint = False
 
     def on_close(self):
-        WebSocketGameHandler.clients.remove(self)
+        print('close', 'WebSocketGameHandler')
+        clients.remove(self)
         self.update_loop.stop()
 
     def update_clients(self):
@@ -634,13 +639,14 @@ handlers = [
     (r'/', IndexHandler),
     (r'/static/JS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
     (r'/static/CSS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/PLAYER/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/ROLLER/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'/static/SPRITES/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'/static/SPRITES/player/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'/static/SPRITES/roller/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
     (r'/static/SPRITES/GRIDBUG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
     (r'/static/IMG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']})
 ]
 
-app = tornado.web.Application(handlers)
+app = tornado.web.Application(handlers, **settings)
 
 if __name__ == '__main__':
     parse_command_line()
