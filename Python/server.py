@@ -73,7 +73,7 @@ class Player(object):
         elif self.right is True and self.left is not True:
             self.pos_change['dx'] = 2
 
-        if self.pos_change['dx'] is not 0 and self.pos_change['dy'] is not 0:
+        if self.pos_change['dx'] != 0 and self.pos_change['dy'] != 0:
             self.pos_change['dx'] *= math.sqrt(2)/2
             self.pos_change['dy'] *= math.sqrt(2)/2
 
@@ -81,26 +81,19 @@ class Player(object):
             self.pos_change['dx'] *= 1.7
             self.pos_change['dy'] *= 1.7
 
-    def aim_weapon(self, x, y):
-        self.aim['x'] = x
-        self.aim['y'] = y
-        diff_x = self.aim['x'] - self.position['x']
-        diff_y = self.aim['y'] - self.position['y']
-
-        if math.fabs(diff_x) > math.fabs(diff_y):
-            if diff_x > 0:
-                self.direction = 'east'
-                self.image_num = 2
-            else:
-                self.direction = 'west'
-                self.image_num = 1
-        else:
-            if diff_y < 0:
-                self.direction = 'west'
-                self.image_num = 0
-            else:
-                self.direction = 'north'
-                self.image_num = 3
+    def aim_weapon(self, direction):
+        if direction == 'north':
+            self.image_num = 3
+            self.direction = 'up'
+        elif direction == 'south':
+            self.image_num = 0
+            self.direction = 'down'
+        elif direction == 'east':
+            self.image_num = 2
+            self.direction = 'right'
+        elif direction == 'west':
+            self.image_num = 2
+            self.direction = 'left'
 
     def shoot(self, game):  # 1's are player width and height, since I don't know how to get those
         if self.sprint is True \
@@ -109,16 +102,16 @@ class Player(object):
         player_x = self.position['x'] + 1 / 2
         player_y = self.position['y'] + 1 / 2
 
-        if self.direction is 'up':
+        if self.direction == 'up':
             player_x += 1
             player_y -= 18
-        elif self.direction is 'left':
+        elif self.direction == 'left':
             player_x -= 9
             player_y -= 5
-        elif self.direction is 'right':
+        elif self.direction == 'right':
             player_x += 10
             player_y -= 5
-        elif self.direction is 'down':
+        elif self.direction == 'down':
             pass
 
         diff_x = self.aim['x'] - player_x
@@ -190,12 +183,12 @@ class Enemy(object):
 class GridBug(Enemy):
     """Derived class that holds data for gridBug enemies"""
     def __init__(self, x, y, hp_multiplier):
+        super(GridBug, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
         self.health = 10 * hp_multiplier
         self.speed = 0.7 * random.random() * 0.5
         self.distance_interval = 10
-        super(GridBug, self).__init__()
 
     def left_bound(self):
         return self.position['x'] + 23
@@ -210,13 +203,13 @@ class GridBug(Enemy):
         return self.position['y'] + 37
 
     def update_image(self):
-        if self.direction is 'east':
+        if self.direction == 'east':
             pass
-        elif self.direction is 'west':
+        elif self.direction == 'west':
             self.img_num += 2
-        elif self.direction is 'north':
+        elif self.direction == 'north':
             self.img_num += 4
-        elif self.direction is 'south':
+        elif self.direction == 'south':
             self.img_num += 6
 
         if self.hit is True:
@@ -226,12 +219,12 @@ class GridBug(Enemy):
 class Roller(Enemy):
     """Derived class that holds data for roller enemies"""
     def __init__(self, x, y, hp_multiplier):
+        super(Roller, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
         self.health = 6 * hp_multiplier
         self.speed = 1.7 * random.random() * 0.6
         self.distance_interval = 15
-        super(Roller, self).__init__()
 
     def left_bound(self):
         if self.direction == 'north' or self.direction == 'south':
@@ -258,13 +251,13 @@ class Roller(Enemy):
             return self.position['x'] + 36
 
     def update_image(self):
-        if self.direction is 'east':
+        if self.direction == 'east':
             pass
-        elif self.direction is 'west':
+        elif self.direction == 'west':
             self.img_num += 2
-        elif self.direction is 'north':
+        elif self.direction == 'north':
             self.img_num += 4
-        elif self.direction is 'south':
+        elif self.direction == 'south':
             self.img_num += 6
 
         if self.hit is True:
@@ -274,12 +267,12 @@ class Roller(Enemy):
 class Heavy(Enemy):
     """Derived class that holds data for heavy enemies"""
     def __init__(self, x, y, hp_multiplier):
+        super(Heavy, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
         self.health = 40 * hp_multiplier
         self.speed = 0.2 * random.random() * 0.5
         self.distance_interval = None  # TODO to be defined
-        super(Heavy, self).__init__()
 
     def left_bound(self):  # TODO to be defined
         return None
@@ -389,8 +382,8 @@ class Game(object):
     def move_bullet(self, bullet):
         start_x = bullet.position['x']
         start_y = bullet.position['y']
-        diff_x = bullet.pos_change['x']
-        diff_y = bullet.pos_change['y']
+        diff_x = bullet.pos_change['dx']
+        diff_y = bullet.pos_change['dy']
         end_x = start_x + diff_x
         end_y = start_y + diff_y
 
@@ -404,7 +397,7 @@ class Game(object):
             self.bullets.remove(bullet)
         else:
             for enemy in self.enemies:
-                if self.check_collision(bullet, enemy) is True:
+                if self.check_collision(bullet, enemy) == True:
                     self.bullets.remove(bullet)
                     if enemy.health <= 0:
                         self.enemies.remove(enemy)
@@ -445,7 +438,7 @@ class Game(object):
         for enemy in self.enemies:
             enemy.closest_player(self.player1, self.player2)
             self.move_enemy(enemy)
-            if enemy.hit is True:
+            if enemy.hit == True:
                 enemy.hit = False
 
 
@@ -504,83 +497,98 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
 
         in_msg = json.loads(message)
 
-        if in_msg['message'] is 'singlePlayerGame':
+        print in_msg
+
+        if in_msg['message'] == 'singlePlayerGame':
+            print "In spg"
             out_msg = json.dumps(self.initial_state_1p)
             self.write_message(out_msg)
-        elif in_msg['message'] is 'twoPlayerGame':
+            print "Game should start!"
+            self.game.populate_enemies()
+            self.game.spawn_enemies()
+            self.update_loop.start()
+        elif in_msg['message'] == 'twoPlayerGame':
             self.clients_started += 1
+            print self.clients_started
             while len(clients) != 2 and self.clients_started != 2:
                 pass
+            print "Game should start!"
             out_msg = json.dumps(self.initial_state_2p)
             self.write_message(out_msg)
+            self.game.populate_enemies()
+            self.game.spawn_enemies()
             self.update_loop.start()
-        elif in_msg['message'] is 'mousedown':
-            if in_msg['client_id'] is 1:
+        elif in_msg['message'] == 'mousedown':
+            if in_msg['clientID'] == 1:
+                self.game.player1.aim['x'] = in_msg['x']
+                self.game.player1.aim['y'] = in_msg['y']
                 self.game.player1.shoot(self.game)
             else:
+                self.game.player2.aim['x'] = in_msg['x']
+                self.game.player2.aim['y'] = in_msg['y']
                 self.game.player2.shoot(self.game)
-        elif in_msg['message'] is 'mouseup':
+        elif in_msg['message'] == 'mouseup':
             pass
-        elif in_msg['message'] is 'mousemove':
-            if in_msg['clientID'] is 1:
-                self.game.player1.aim_weapon(in_msg['x'], in_msg['y'])
-            elif in_msg['clientID'] is 2:
-                self.game.player2.aim_weapon(in_msg['x'], in_msg['y'])
-        elif in_msg['message'] is 'keydown':
-            if in_msg['clientID'] is 1:
-                if in_msg['keycode'] is KEY_W:
+        elif in_msg['message'] == 'mousemove':
+            if in_msg['clientID'] == 1:
+                self.game.player1.aim_weapon(in_msg['direction'])
+            elif in_msg['clientID'] == 2:
+                self.game.player2.aim_weapon(in_msg['direction'])
+        elif in_msg['message'] == 'keydown':
+            if in_msg['clientID'] == 1:
+                if in_msg['keycode'] == KEY_W:
                     self.game.player1.up = True
-                elif in_msg['keycode'] is KEY_A:
+                elif in_msg['keycode'] == KEY_A:
                     self.game.player1.left = True
-                elif in_msg['keycode'] is KEY_S:
+                elif in_msg['keycode'] == KEY_S:
                     self.game.player1.down = True
-                elif in_msg['keycode'] is KEY_D:
+                elif in_msg['keycode'] == KEY_D:
                     self.game.player1.right = True
-                elif in_msg['keycode'] is KEY_E:
-                    if self.game.player1.pistol_equipped is True:
+                elif in_msg['keycode'] == KEY_E:
+                    if self.game.player1.pistol_equipped:
                         self.game.player1.pistol_equipped = False
                     else:
                         self.game.player1.pistol_equipped = True
-                elif in_msg['keycode'] is KEY_SPACE:
+                elif in_msg['keycode'] == KEY_SPACE:
                     self.game.player1.sprint = True
-            elif in_msg['clientID'] is 2:
-                if in_msg['keycode'] is KEY_W:
+            elif in_msg['clientID'] == 2:
+                if in_msg['keycode'] == KEY_W:
                     self.game.player2.up = True
-                elif in_msg['keycode'] is KEY_A:
+                elif in_msg['keycode'] == KEY_A:
                     self.game.player2.left = True
-                elif in_msg['keycode'] is KEY_S:
+                elif in_msg['keycode'] == KEY_S:
                     self.game.player2.down = True
-                elif in_msg['keycode'] is KEY_D:
+                elif in_msg['keycode'] == KEY_D:
                     self.game.player2.right = True
-                elif in_msg['keycode'] is KEY_E:
-                    if self.game.player2.pistol_equipped is True:
+                elif in_msg['keycode'] == KEY_E:
+                    if self.game.player2.pistol_equipped:
                         self.game.player2.pistol_equipped = False
                     else:
                         self.game.player2.pistol_equipped = True
-                elif in_msg['keycode'] is KEY_SPACE:
+                elif in_msg['keycode'] == KEY_SPACE:
                     self.game.player2.sprint = True
-        elif in_msg['message'] is 'keyup':
-            if in_msg['clientID'] is 1:
-                if in_msg['keycode'] is KEY_W:
+        elif in_msg['message'] == 'keyup':
+            if in_msg['clientID'] == 1:
+                if in_msg['keycode'] == KEY_W:
                     self.game.player1.up = False
-                elif in_msg['keycode'] is KEY_A:
+                elif in_msg['keycode'] == KEY_A:
                     self.game.player1.left = False
-                elif in_msg['keycode'] is KEY_S:
+                elif in_msg['keycode'] == KEY_S:
                     self.game.player1.down = False
-                elif in_msg['keycode'] is KEY_D:
+                elif in_msg['keycode'] == KEY_D:
                     self.game.player1.right = False
-                elif in_msg['keycode'] is KEY_SPACE:
+                elif in_msg['keycode'] == KEY_SPACE:
                     self.game.player1.sprint = False
-            elif in_msg['clientID'] is 2:
-                if in_msg['keycode'] is KEY_W:
+            elif in_msg['clientID'] == 2:
+                if in_msg['keycode'] == KEY_W:
                     self.game.player2.up = False
-                elif in_msg['keycode'] is KEY_A:
+                elif in_msg['keycode'] == KEY_A:
                     self.game.player2.left = False
-                elif in_msg['keycode'] is KEY_S:
+                elif in_msg['keycode'] == KEY_S:
                     self.game.player2.down = False
-                elif in_msg['keycode'] is KEY_D:
+                elif in_msg['keycode'] == KEY_D:
                     self.game.player2.right = False
-                elif in_msg['keycode'] is KEY_SPACE:
+                elif in_msg['keycode'] == KEY_SPACE:
                     self.game.player2.sprint = False
 
     def on_close(self):
