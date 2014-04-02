@@ -14,37 +14,37 @@ $(document).ready(function(){
       wallVertical = new Image(),
       backgroundPattern = new Image();
 
-  playerImg[0].src = "staticf/SPRITES/PLAYER/p1_stand_N.png')";
-  playerImg[1].src = "static/SPRITES/PLAYER/p1_stand_W.png')";
-  playerImg[2].src = "static/SPRITES/PLAYER/p1_stand_E.png')";
-  playerImg[3].src = "static/SPRITES/PLAYER/p1_stand_S.png')";
-  rollerImg[0].src = "static/SPRITES/ROLLER/roller_E1.png')";
-  rollerImg[1].src = "static/SPRITES/ROLLER/roller_E2.png')";
-  rollerImg[2].src = "static/SPRITES/ROLLER/roller_W1.png')";
-  rollerImg[3].src = "static/SPRITES/ROLLER/roller_W2.png')";
-  rollerImg[4].src = "static/SPRITES/ROLLER/roller_N1.png')";
-  rollerImg[5].src = "static/SPRITES/ROLLER/roller_N2.png')";
-  rollerImg[6].src = "static/SPRITES/ROLLER/roller_S1.png')";
-  rollerImg[7].src = "static/SPRITES/ROLLER/roller_S2.png')";
-  rollerImg[8].src = "static/SPRITES/ROLLER/roller_E1_hit.png')";
-  rollerImg[9].src = "static/SPRITES/ROLLER/roller_E2_hit.png')";
-  rollerImg[10].src = "static/SPRITES/ROLLER/roller_W1_hit.png')";
-  rollerImg[11].src = "static/SPRITES/ROLLER/roller_W2_hit.png')";
-  rollerImg[12].src = "static/SPRITES/ROLLER/roller_N1_hit.png')";
-  rollerImg[13].src = "static/SPRITES/ROLLER/roller_N2_hit.png')";
-  rollerImg[14].src = "static/SPRITES/ROLLER/roller_S1_hit.png')";
-  rollerImg[15].src = "static/SPRITES/ROLLER/roller_S2_hit.png')";
-  gridBugImg[0].src = "static/SPRITES/GRIDBUG/gridbug_E1.png')";
-  gridBugImg[1].src = "static/SPRITES/GRIDBUG/gridbug_E2.png')";
-  gridBugImg[2].src = "static/SPRITES/GRIDBUG/gridbug_W1.png')";
-  gridBugImg[3].src = "static/SPRITES/GRIDBUG/gridbug_W2.png')";
-  gridBugImg[4].src = "static/SPRITES/GRIDBUG/gridbug_E1_hit.png')";
-  gridBugImg[5].src = "static/SPRITES/GRIDBUG/gridbug_E2_hit.png')";
-  gridBugImg[6].src = "static/SPRITES/GRIDBUG/gridbug_W1_hit.png')";
-  gridBugImg[7].src = "static/SPRITES/GRIDBUG/gridbug_W2_hit.png')";
-  wallHorizontal.src = "static/IMG/wall_horizontal.png')";
-  wallVertical.src = "static/IMG/wall_vertical.png')";
-  backgroundPattern.src = "static/IMG/backgroundPattern.png')";
+  playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';
+  playerImg[1].src = 'static/SPRITES/player/p1_stand_W.png';
+  playerImg[2].src = 'static/SPRITES/player/p1_stand_E.png';
+  playerImg[3].src = 'static/SPRITES/player/p1_stand_S.png';
+  rollerImg[0].src = 'static/SPRITES/roller/roller_E1.png';
+  rollerImg[1].src = 'static/SPRITES/roller/roller_E2.png';
+  rollerImg[2].src = 'static/SPRITES/roller/roller_W1.png';
+  rollerImg[3].src = 'static/SPRITES/roller/roller_W2.png';
+  rollerImg[4].src = 'static/SPRITES/roller/roller_N1.png';
+  rollerImg[5].src = 'static/SPRITES/roller/roller_N2.png';
+  rollerImg[6].src = 'static/SPRITES/roller/roller_S1.png';
+  rollerImg[7].src = 'static/SPRITES/roller/roller_S2.png';
+  rollerImg[8].src = 'static/SPRITES/roller/roller_E1_hit.png';
+  rollerImg[9].src = 'static/SPRITES/roller/roller_E2_hit.png';
+  rollerImg[10].src = 'static/SPRITES/roller/roller_W1_hit.png';
+  rollerImg[11].src = 'static/SPRITES/roller/roller_W2_hit.png';
+  rollerImg[12].src = 'static/SPRITES/roller/roller_N1_hit.png';
+  rollerImg[13].src = 'static/SPRITES/roller/roller_N2_hit.png';
+  rollerImg[14].src = 'static/SPRITES/roller/roller_S1_hit.png';
+  rollerImg[15].src = 'static/SPRITES/roller/roller_S2_hit.png';
+  gridBugImg[0].src = 'static/SPRITES/GRIDBUG/gridbug_E1.png';
+  gridBugImg[1].src = 'static/SPRITES/GRIDBUG/gridbug_E2.png';
+  gridBugImg[2].src = 'static/SPRITES/GRIDBUG/gridbug_W1.png';
+  gridBugImg[3].src = 'static/SPRITES/GRIDBUG/gridbug_W2.png';
+  gridBugImg[4].src = 'static/SPRITES/GRIDBUG/gridbug_E1_hit.png';
+  gridBugImg[5].src = 'static/SPRITES/GRIDBUG/gridbug_E2_hit.png';
+  gridBugImg[6].src = 'static/SPRITES/GRIDBUG/gridbug_W1_hit.png';
+  gridBugImg[7].src = 'static/SPRITES/GRIDBUG/gridbug_W2_hit.png';
+  wallHorizontal.src = 'static/IMG/wall_horizontal.png';
+  wallVertical.src = 'static/IMG/wall_vertical.png';
+  backgroundPattern.src = 'static/IMG/backgroundPattern.png';
 
   var ws = new WebSocket('ws://' + document.location.host + '/game');
 
@@ -479,25 +479,30 @@ $(document).ready(function(){
 
     ws.onmessage = function(msg){
       var data = JSON.parse(msg.data);
-      console.log(data);
-      clientId = data.clientId;
-      if(message){
+      //console.log(data);
+      if(data.clientID){
+        console.log("Client id: " + data.clientID);
+        clientId = data.clientID;
+      }
+      if(data.message){
         var message = data.message;
         if(message == 'singlePlayerGame'){
+          console.log('single player game');
           var gameState = data.gameState,
               numPlayers = 1;
-          playGame(numPlayers, gameState);
+          //console.log(gameState);
+          playGame(numPlayers, gameState, ws);
         }else if(message == 'twoPlayerGame'){
           var gameState = data.gameState,
               numPlayers = 2;
-          playGame(numPlayers, gameState);
+          playGame(numPlayers, gameState, ws);
         }
       }
     };
 
     singlePlayer.on('click', function(){
       var data = JSON.stringify({
-        'clientId': clientId,
+        'clientID': clientId,
         'message': 'singlePlayerGame'
       });
       setTimeout(function(){
@@ -509,12 +514,13 @@ $(document).ready(function(){
     twoPlayer.on('click', function(){
       setTimeout(function(){
         var data = JSON.stringify({
-          'clientId': clientId,
+          'clientID': clientId,
           'message': 'twoPlayerGame'
         });
         ws.send(data);
+        console.log(data);
       }, 75);
-      console.log(data);
+
     });
 
     howToPlay.on('click', function(){
@@ -1243,6 +1249,7 @@ $(document).ready(function(){
    * Single player game function that controls running the game
    */
   function playGame(numPlayers, gameState){
+    console.log('playing a game');
     if(numPlayers == 1){
       $('title').text('Single Player Game');
     }else{
@@ -1264,8 +1271,14 @@ $(document).ready(function(){
 
     //variables used to store the positions of the walls
     var walls = [],
-        verticalWalls = gameState.verticalWalls,
+        verticalWalls = [],
+        horizontalWalls = [];
+    if(gameState.verticalWalls){
+        verticalWalls = gameState.verticalWalls;
+    }
+    if(gameState.horizontalWalls){
         horizontalWalls = gameState.horizontalWalls;
+    }
 
     //varibales used to store the enemy objects
     var enemies = [];
@@ -1341,16 +1354,17 @@ $(document).ready(function(){
 
       //creates the player and adds him to the foreground
       player = new createPlayer(gameState.player.x, gameState.player.y);
-      foreground.add(gameState.player.obj);
+      foreground.add(player.obj);
 
       //creates the other player if it is a two player game
       if(numPlayers == 2){
         otherPlayer = new createPlayer(gameState.otherPlayer.x, gameState.otherPlayer.y);
-        foreground.add(gameState.otherPlayer.obj);
+        foreground.add(otherPlayer.obj);
       }
 
       //add the layers to the stage
       stage.add(background).add(foreground).add(fogLayer);
+      redraw();
     })();
     
     //constructor functions to create a Player
@@ -1362,6 +1376,7 @@ $(document).ready(function(){
         height: imageSize,
         image: playerImg[0]
       });
+      this.direction = 'up';
     };
 
     function createWall(x, y, type){
@@ -1591,10 +1606,12 @@ $(document).ready(function(){
      */
     
     //mouse down event is used to fire a bullet
-    $('#play_area').on('mousedown', function(){
+    $('#play_area').on('mousedown', function(evt){
       var data = JSON.stringify({
-        'clientId': clientId,
-        'message': 'mousedown'
+        'clientID': clientId,
+        'message': 'mousedown',
+        'x': evt.pageX - playAreaOffset.left + background.clipX(),
+        'y': evt.pageY - playAreaOffset.top + background.clipY()
       });
       ws.send(data);
     });
@@ -1602,7 +1619,7 @@ $(document).ready(function(){
     //mouse up event is used to stop rapid fire
     $('#play_area').on('mouseup', function(){
       var data = JSON.stringify({
-        'clientId': clientId,
+        'clientID': clientId,
         'message': 'mouseup'
       });
       ws.send(data);
@@ -1610,19 +1627,52 @@ $(document).ready(function(){
 
     //mouse move event is used to aim the gun (updates player model to show which direction the player is aiming)
     $('#play_area').on('mousemove', function(evt){
-      var data  = JSON.stringify({
-        'clientId': clientId,
+      var x = evt.pageX - playAreaOffset.left + background.clipX(),
+          y = evt.pageY - playAreaOffset.top + background.clipY(),
+          diffX = x - player.obj.x(),
+          diffY = y - player.obj.y();
+
+      var data  = {
+        'clientID': clientId,
         'message': 'mousemove',
-        'x': evt.pageX - playAreaOffset.left + background.clipX(),
-        'y': evt.pageY - playAreaOffset.top + background.clipY()
-      });
-      ws.send(data);
+        'direction' : 'none'
+      };
+
+      if(Math.abs(diffX) > Math.abs(diffY)){
+          if(diffX > 0){
+              if(player.direction != 'east'){
+                  player.direction = 'east';
+                  data.direction = 'east';
+                  ws.send(JSON.stringify(data));
+              }
+          }else{
+              if(player.direction != 'west'){
+                  player.direction = 'west';
+                  data.direction = 'west';
+                  ws.send(JSON.stringify(data));
+              }
+          }
+      }else{
+        if(diffY > 0){
+              if(player.direction != 'south'){
+                  player.direction = 'south';
+                  data.direction = 'south';
+                  ws.send(JSON.stringify(data));
+              }
+          }else{
+              if(player.direction != 'north'){
+                  player.direction = 'north';
+                  data.direction = 'north';
+                  ws.send(JSON.stringify(data));
+              }
+          }
+      }
     })
 
     //keydown event is used to increment the player movement, toggle the weapons
     $(document).keydown( function(evt){
       var data = JSON.stringify({
-        'clientId': clientId,
+        'clientID': clientId,
         'message': 'keydown',
         'keycode': evt.keyCode
       });
@@ -1630,11 +1680,12 @@ $(document).ready(function(){
     });
 
     //keyup event is used to decrement the player movement
-    $(document).on('keyup', function(evt){
+    //$(document).on('keyup', function(evt){
+    $(document).keyup( function(evt){
       var data = JSON.stringify({
-        'clientId': clientId,
+        'clientID': clientId,
         'message': 'keyup',
-        'keycode': evt.keycode
+        'keycode': evt.keyCode
       });
       ws.send(data);
     });
@@ -1652,7 +1703,7 @@ $(document).ready(function(){
 
     ws.onmessage = function(msg){
       var data = JSON.parse(msg.data);
-      console.log('update');
+      //console.log(data);
       if(data.message == 'updateState'){
         var gameState = data.gameState,
             enemyData = gameState.enemyData,
@@ -1664,7 +1715,7 @@ $(document).ready(function(){
           otherPlayerData = gameState.otherPlayerData;
           updatePlayer(otherPlayerData, otherPlayer);
         }
-        updateFog();
+        updateFog(playerData, otherPlayerData);
         bulletGroup.destroyChildren();
         enemyGroup.destroyChildren();
         for(var i = 0; i < enemyData.length; ++i){
