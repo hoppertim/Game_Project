@@ -486,25 +486,28 @@ class IndexHandler(tornado.web.RequestHandler):
         request.render('index.html')
 
 clients = []
+clients_started = []
+game = Game()
+
 class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
         super(WebSocketGameHandler, self).__init__(application, request, **kwargs)
         #self.clients = []
-        self.game = Game()
+        #self.game = Game()
         self.client_id = 0
-        self.clients_started = 0
+        #self.clients_started = 0
         self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, 40)
         self.initial_state_1p = dict(
             message='singlePlayerGame',
             gameState=dict(
-                player=dict(x=self.game.player1.position['x'], y=self.game.player1.position['y'])
+                player=dict(x=game.player1.position['x'], y=game.player1.position['y'])
             )
         )
         self.initial_state_2p = dict(
             message='twoPlayerGame',
             gameState=dict(
-                player=dict(x=self.game.player1.position['x'], y=self.game.player1.position['y']),
-                otherPlayer=dict(x=self.game.player2.position['x'], y=self.game.player2.position['y'])
+                player=dict(x=game.player1.position['x'], y=game.player1.position['y']),
+                otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'])
             )
         )
         self.update_state = dict(
@@ -542,112 +545,115 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             out_msg = json.dumps(self.initial_state_1p)
             self.write_message(out_msg)
             print "Game should start!"
-            self.game.populate_enemies()
-            self.game.spawn_enemies()
+            game.populate_enemies()
+            game.spawn_enemies()
             self.update_loop.start()
         elif in_msg['message'] == 'twoPlayerGame':
-            self.clients_started += 1
-            print self.clients_started
-            while len(clients) != 2 and self.clients_started != 2:
-                pass
-            print "Game should start!"
-            out_msg = json.dumps(self.initial_state_2p)
-            self.write_message(out_msg)
-            self.game.populate_enemies()
-            self.game.spawn_enemies()
-            self.update_loop.start()
+            if self not in clients_started:
+                clients_started.append(self)
+            if len(clients_started) == 2:
+                game.__init__()
+                print "Game should start!"
+                out_msg = json.dumps(self.initial_state_2p)
+                for client in clients_started:
+                    client.write_message(out_msg)
+                game.populate_enemies()
+                game.spawn_enemies()
+                for client in clients_started:
+                    client.update_loop.start()
+                clients_started.__init__()
         elif in_msg['message'] == 'mousedown':
             if in_msg['clientID'] == 1:
-                self.game.player1.aim['x'] = in_msg['x']
-                self.game.player1.aim['y'] = in_msg['y']
-                self.game.player1.shoot(self.game)
-            else:
-                self.game.player2.aim['x'] = in_msg['x']
-                self.game.player2.aim['y'] = in_msg['y']
-                self.game.player2.shoot(self.game)
+                game.player1.aim['x'] = in_msg['x']
+                game.player1.aim['y'] = in_msg['y']
+                game.player1.shoot(game)
+            elif in_msg['clientID'] == 2:
+                game.player2.aim['x'] = in_msg['x']
+                game.player2.aim['y'] = in_msg['y']
+                game.player2.shoot(game)
         elif in_msg['message'] == 'mouseup':
             pass
         elif in_msg['message'] == 'mousemove':
             if in_msg['clientID'] == 1:
-                self.game.player1.aim_weapon(in_msg['direction'])
+                game.player1.aim_weapon(in_msg['direction'])
             elif in_msg['clientID'] == 2:
-                self.game.player2.aim_weapon(in_msg['direction'])
+                game.player2.aim_weapon(in_msg['direction'])
         elif in_msg['message'] == 'keydown':
             if in_msg['clientID'] == 1:
                 if in_msg['keycode'] == KEY_W:
-                    self.game.player1.up = True
-                    self.game.player1.update_movement()
+                    game.player1.up = True
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_A:
-                    self.game.player1.left = True
-                    self.game.player1.update_movement()
+                    game.player1.left = True
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_S:
-                    self.game.player1.down = True
-                    self.game.player1.update_movement()
+                    game.player1.down = True
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_D:
-                    self.game.player1.right = True
-                    self.game.player1.update_movement()
+                    game.player1.right = True
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_E:
-                    if self.game.player1.pistol_equipped:
-                        self.game.player1.pistol_equipped = False
+                    if game.player1.pistol_equipped:
+                        game.player1.pistol_equipped = False
                     else:
-                        self.game.player1.pistol_equipped = True
+                        game.player1.pistol_equipped = True
                 elif in_msg['keycode'] == KEY_SPACE:
-                    self.game.player1.sprint = True
-                    self.game.player1.update_movement()
+                    game.player1.sprint = True
+                    game.player1.update_movement()
             elif in_msg['clientID'] == 2:
                 if in_msg['keycode'] == KEY_W:
-                    self.game.player2.up = True
-                    self.game.player2.update_movement()
+                    game.player2.up = True
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_A:
-                    self.game.player2.left = True
-                    self.game.player2.update_movement()
+                    game.player2.left = True
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_S:
-                    self.game.player2.down = True
-                    self.game.player2.update_movement()
+                    game.player2.down = True
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_D:
-                    self.game.player2.right = True
-                    self.game.player2.update_movement()
+                    game.player2.right = True
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_E:
-                    if self.game.player2.pistol_equipped:
-                        self.game.player2.pistol_equipped = False
+                    if game.player2.pistol_equipped:
+                        game.player2.pistol_equipped = False
                     else:
-                        self.game.player2.pistol_equipped = True
+                        game.player2.pistol_equipped = True
                 elif in_msg['keycode'] == KEY_SPACE:
-                    self.game.player2.sprint = True
-                    self.game.player2.update_movement()
+                    game.player2.sprint = True
+                    game.player2.update_movement()
         elif in_msg['message'] == 'keyup':
             if in_msg['clientID'] == 1:
                 if in_msg['keycode'] == KEY_W:
-                    self.game.player1.up = False
-                    self.game.player1.update_movement()
+                    game.player1.up = False
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_A:
-                    self.game.player1.left = False
-                    self.game.player1.update_movement()
+                    game.player1.left = False
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_S:
-                    self.game.player1.down = False
-                    self.game.player1.update_movement()
+                    game.player1.down = False
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_D:
-                    self.game.player1.right = False
-                    self.game.player1.update_movement()
+                    game.player1.right = False
+                    game.player1.update_movement()
                 elif in_msg['keycode'] == KEY_SPACE:
-                    self.game.player1.sprint = False
-                    self.game.player1.update_movement()
+                    game.player1.sprint = False
+                    game.player1.update_movement()
             elif in_msg['clientID'] == 2:
                 if in_msg['keycode'] == KEY_W:
-                    self.game.player2.up = False
-                    self.game.player2.update_movement()
+                    game.player2.up = False
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_A:
-                    self.game.player2.left = False
-                    self.game.player2.update_movement()
+                    game.player2.left = False
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_S:
-                    self.game.player2.down = False
-                    self.game.player2.update_movement()
+                    game.player2.down = False
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_D:
-                    self.game.player2.right = False
-                    self.game.player2.update_movement()
+                    game.player2.right = False
+                    game.player2.update_movement()
                 elif in_msg['keycode'] == KEY_SPACE:
-                    self.game.player2.sprint = False
-                    self.game.player2.update_movement()
+                    game.player2.sprint = False
+                    game.player2.update_movement()
 
     def on_close(self):
         print('close', 'WebSocketGameHandler')
@@ -668,7 +674,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         )
 
         self.update_state['gameState']['enemyData'] = []
-        for enemy in self.game.enemies:
+        for enemy in game.enemies:
             enemy_obj = {}
             enemy_obj['x'] = enemy.position['x']
             enemy_obj['y'] = enemy.position['y']
@@ -682,7 +688,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             self.update_state['gameState']['enemyData'].append(enemy_obj)
 
         self.update_state['gameState']['bulletData'] = []
-        for bullet in self.game.bullets:
+        for bullet in game.bullets:
             bullet_obj = {}
             bullet_obj['x'] = bullet.position['x']
             bullet_obj['y'] = bullet.position['y']
@@ -693,18 +699,18 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
 
         print len(self.update_state['gameState']['bulletData'])
 
-        self.update_state['gameState']['playerData']['x'] = self.game.player1.position['x']
-        self.update_state['gameState']['playerData']['y'] = self.game.player1.position['y']
-        self.update_state['gameState']['playerData']['imgNum'] = self.game.player1.image_num
+        self.update_state['gameState']['playerData']['x'] = game.player1.position['x']
+        self.update_state['gameState']['playerData']['y'] = game.player1.position['y']
+        self.update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
 
-        self.update_state['gameState']['otherPlayerData']['x'] = self.game.player1.position['x']
-        self.update_state['gameState']['otherPlayerData']['y'] = self.game.player1.position['y']
-        self.update_state['gameState']['otherPlayerData']['imgNum'] = self.game.player1.image_num
+        self.update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
+        self.update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
+        self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
 
         ud_st = json.dumps(self.update_state)
         self.write_message(ud_st)
 
-        self.game.update()
+        game.update()
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static')
