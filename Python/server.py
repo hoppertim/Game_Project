@@ -250,7 +250,7 @@ class Roller(Enemy):
         self.position['x'] = x
         self.position['y'] = y
         self.health = 6 * hp_multiplier
-        self.speed = 2.7 * random.random() * 0.6
+        self.speed = 1.7 + random.random() * 0.6
         self.distance_interval = 15
 
     def left_bound(self):
@@ -267,17 +267,18 @@ class Roller(Enemy):
 
     def top_bound(self):
         if self.direction == 'north' or self.direction == 'south':
-            return self.position['x'] + 24
+            return self.position['y'] + 24
         else:
-            return self.position['x'] + 25
+            return self.position['y'] + 25
 
     def bottom_bound(self):
         if self.direction == 'north' or self.direction == 'south':
-            return self.position['x'] + 38
+            return self.position['y'] + 38
         else:
-            return self.position['x'] + 36
+            return self.position['y'] + 36
 
     def update_image(self):
+    	"""This is not going to work since it increases the imgNum everytime without reseting it"""
         """Set the image to be displayed during a frame"""
         if self.direction == 'east':
             pass
