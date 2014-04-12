@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title></title>
-  <link rel="stylesheet" type="text/css" href="../CSS/normalize.css">
-  <link rel="stylesheet" type="text/css" href="../CSS/main.css">
-  <link rel="stylesheet" type="text/css" href="../CSS/style.css">
-  <script src="../JS/jquery-2.1.0.min.js"></script>
-  <script src="../JS/kinetic-v5.0.1.min.js"></script>
-  <script src="../JS/underscore-min.js"></script>
-  <script src="../JS/game_engine.js"></script>
-</head>
-<body>
-<div id="game">
-  <div id="left_panel">
-  </div>
-  <div id="play_area">
-  </div>
-  <div id="right_panel">
-  </div>
-</div> 
-</body>
+    <head>
+      <title></title>
+      <link rel="stylesheet" type="text/css" href="{{ static_url('CSS/normalize.css') }}">
+      <link rel="stylesheet" type="text/css" href="{{ static_url('CSS/main.css') }}">
+      <link rel="stylesheet" type="text/css" href="{{ static_url('CSS/style.css') }}">
+      <script src="{{ static_url('JS/jquery-2.1.0.min.js') }}"></script>
+      <script src="http://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.0.1/kinetic.min.js"></script>
+      <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+      <script src="{{ static_url('JS/game_engine_client.js') }}"></script>
+    </head>
+
+    <body>
+        <div id="game">
+            <div id="left_panel">
+            </div>
+            <div id="play_area">
+            </div>
+            <div id="right_panel">
+            </div>
+        </div>
+    </body>
 </html>
+
