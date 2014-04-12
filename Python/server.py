@@ -24,7 +24,7 @@ class Player(object):
     """Structure that holds player data"""
     def __init__(self, posx, posy):
         self.position = dict(x=posx, y=posy)
-        self.health = 3
+        self.health = 100
         self.aim = dict(x=0, y=0)
         self.money = 0
         self.up = False
@@ -65,17 +65,17 @@ class Player(object):
         self.pos_change['dy'] = 0
 
         if self.up is True and self.down is not True:
-            print "should move up"
+            #print "should move up"
             self.pos_change['dy'] = -2
         elif self.down is True and self.up is not True:
-            print "should move down"
+            #print "should move down"
             self.pos_change['dy'] = 2
 
         if self.left is True and self.right is not True:
-            print "should move left"
+            #print "should move left"
             self.pos_change['dx'] = -2
         elif self.right is True and self.left is not True:
-            print "should move right"
+            #print "should move right"
             self.pos_change['dx'] = 2
 
         if self.pos_change['dx'] != 0 and self.pos_change['dy'] != 0:
@@ -171,6 +171,8 @@ class Enemy(object):
         self.img_num = 0
         self.speed = 0
         self.distance = 0
+        self.attack_wait = 0
+        self.damage_interval = 0
 
     def closest_player(self, player1, player2):
         """Logic for determining which player the enemy will target"""
@@ -178,32 +180,24 @@ class Enemy(object):
         diff_y1 = player1.position['y'] - self.position['y']
 
         dist1 = math.sqrt(diff_x1**2 + diff_y1**2)
-        print str(dist1)
+        #print str(dist1)
 
         diff_x2 = player2.position['x'] - self.position['x']
         diff_y2 = player2.position['y'] - self.position['y']
 
         dist2 = math.sqrt(diff_x2**2 + diff_y2**2)
-        print str(dist2)
+        #print str(dist2)
 
-        #closest = player1
         if dist1 <= dist2:
-            print "Approaching player 1."
+            #print "Approaching player 1."
             self.distance = dist1
             self.pos_change['dx'] = diff_x1 / self.distance * self.speed
             self.pos_change['dy'] = diff_y1 / self.distance * self.speed
         else:
-            print "Approaching player 2."
+            #print "Approaching player 2."
             self.distance = dist2
             self.pos_change['dx'] = diff_x2 / self.distance * self.speed
             self.pos_change['dy'] = diff_y2 / self.distance * self.speed
-
-        #diff_X = closest.position['x'] - self.position['x']
-        #diff_Y = closest.position['y'] - self.position['x']
-
-
-        #self.pos_change['dx'] = diff_X / self.distance * self.speed
-        #self.pos_change['dy'] = diff_Y / self.distance * self.speed
 
 
 class GridBug(Enemy):
@@ -215,6 +209,7 @@ class GridBug(Enemy):
         self.health = 10 * hp_multiplier
         self.speed = 1.7 * random.random() * 0.5
         self.distance_interval = 10
+        self.damage_interval = 20
 
     def left_bound(self):
         return self.position['x'] + 23
@@ -252,6 +247,7 @@ class Roller(Enemy):
         self.health = 6 * hp_multiplier
         self.speed = 1.7 + random.random() * 0.6
         self.distance_interval = 15
+        self.damage_interval = 15
 
     def left_bound(self):
         if self.direction == 'north' or self.direction == 'south':
@@ -278,16 +274,18 @@ class Roller(Enemy):
             return self.position['y'] + 36
 
     def update_image(self):
-    	"""This is not going to work since it increases the imgNum everytime without reseting it"""
-        """Set the image to be displayed during a frame"""
+        """This is not going to work since it increases the imgNum everytime without reseting it
+        Set the image to be displayed during a frame"""
+        image_num = self.img_num
+
         if self.direction == 'east':
             pass
         elif self.direction == 'west':
-            self.img_num += 2
+            image_num += 2
         elif self.direction == 'north':
-            self.img_num += 4
+            image_num += 4
         elif self.direction == 'south':
-            self.img_num += 6
+            image_num += 6
 
         if self.hit is True:
             self.img_num += 8
@@ -302,6 +300,7 @@ class Heavy(Enemy):
         self.health = 40 * hp_multiplier
         self.speed = 0.2 * random.random() * 0.5
         self.distance_interval = None  # TODO to be defined
+        self.damage_interval = 25
 
     def left_bound(self):  # TODO to be defined
         return None
@@ -339,19 +338,20 @@ class Bullet(object):
 class Game(object):
     """Structure that holds the state of a given game"""
     def __init__(self):
-        self.play_area = dict(width=1000, height=600)
+        self.play_area = dict(width=1200, height=800)
         self.player1 = Player(400, 300)
         self.player2 = Player(600, 300)
         self.bullets = []
         self.enemies = []
         self.level_complete = False
         self.level_number = 1
+        self.game_lost = False
+        self.wave_complete = False
 
     def populate_enemies(self):
         """Populate enemies list randomly"""
         hp_multiplier = 1
-        for i in range(0, 50 * self.level_number):
-        #for i in range(0, self.level_number):
+        for i in range(0, 3**self.level_number):
             num = random.random() * 2
 
             if num <= 1:
@@ -390,13 +390,13 @@ class Game(object):
         player_x = player.position['x']
         player_y = player.position['y']
 
-        if self.play_area['width'] - 5 + 153 - player.pos_change['dx'] \
+        if self.play_area['width'] + 15 - 64 - player.pos_change['dx'] \
                 >= player_x >= -5 - player.pos_change['dx']:
             diff_x = player.pos_change['dx']
             x_pos = player_x + diff_x
             player.position['x'] = x_pos
 
-        if self.play_area['height'] - 5 + 148 - player.pos_change['dy'] \
+        if self.play_area['height'] + 5 - 64 - player.pos_change['dy'] \
                 >= player_y >= -10 - player.pos_change['dy']:
             diff_y = player.pos_change['dy']
             y_pos = player_y + diff_y
@@ -404,12 +404,8 @@ class Game(object):
 
     def move_enemy(self, enemy):
         """Update enemy position on the field"""
-        print "Initial enemy x position " + str(enemy.position['x'])
-        print "Initial enemy y position " + str(enemy.position['y'])
         enemy.position['x'] += enemy.pos_change['dx']
         enemy.position['y'] += enemy.pos_change['dy']
-        print "New enemy x position " + str(enemy.position['x'])
-        print "New enemy y position " + str(enemy.position['y'])
         enemy.distance += enemy.speed
         if enemy.distance > enemy.distance_interval:
             enemy.distance -= enemy.distance_interval
@@ -454,9 +450,17 @@ class Game(object):
     def collide_process(self, object1, object2):
         """Handle what should happen on collision between different objects"""
         if isinstance(object1, Player) and isinstance(object2, Enemy):
-            object1.health -= 1
+            object2.attack_wait += 1
+            if object2.attack_wait >= object2.damage_interval:
+                object2.attack_wait = 0
+                object1.health -= 1
+                object1.hit = True
         elif isinstance(object1, Enemy) and isinstance(object2, Player):
-            object2.health -= 1
+            object1.attack_wait += 1
+            if object1.attack_wait >= object1.damage_interval:
+                object1.attack_wait = 0
+                object2.health -= 1
+                object2.hit = True
         elif isinstance(object1, Bullet) and isinstance(object2, Enemy):
             if isinstance(object2, GridBug) or isinstance(object2, Roller) or isinstance(object2, Heavy):
                 object2.health -= object1.strength
@@ -480,6 +484,23 @@ class Game(object):
             if enemy.hit:
                 enemy.hit = False
 
+            if self.check_collision(enemy, self.player1):
+                print "Player 1 Hit! Health now at " + str(self.player1.health)
+
+            if self.check_collision(enemy, self.player2):
+                print "Player 2 Hit! Health now at " + str(self.player2.health)
+
+
+        if self.player1.hit:
+            self.player1.hit = False
+        if self.player2.hit:
+            self.player2.hit = False
+
+        if self.player1.health <= 0 or self.player2.health <= 0:
+            self.game_lost = True
+        elif len(self.enemies) <= 0:
+            self.wave_complete = True
+
 
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -490,13 +511,13 @@ clients = []
 clients_started = []
 game = Game()
 
+
 class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
         super(WebSocketGameHandler, self).__init__(application, request, **kwargs)
         #self.clients = []
         #self.game = Game()
         self.client_id = 0
-        #self.clients_started = 0
         self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, 40)
         self.initial_state_1p = dict(
             message='singlePlayerGame',
@@ -521,6 +542,14 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             )
         )
 
+        self.game_lost = dict(
+            message='gameLost'
+        )
+
+        self.wave_complete = dict(
+            message='waveComplete'
+        )
+
     def open(self, *args):
         print('open', 'WebSocketGameHandler')
         print len(clients)
@@ -535,17 +564,16 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         clients[self.client_id-1].write_message(scid)
 
     def on_message(self, message):
-        print message
-
         in_msg = json.loads(message)
 
-        print in_msg
+        #print in_msg
 
         if in_msg['message'] == 'singlePlayerGame':
             print "In spg"
             out_msg = json.dumps(self.initial_state_1p)
             self.write_message(out_msg)
             print "Game should start!"
+            game.__init__()
             game.populate_enemies()
             game.spawn_enemies()
             self.update_loop.start()
@@ -698,20 +726,52 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
 
 
 
-        print len(self.update_state['gameState']['bulletData'])
+        #print len(self.update_state['gameState']['bulletData'])
 
-        self.update_state['gameState']['playerData']['x'] = game.player1.position['x']
-        self.update_state['gameState']['playerData']['y'] = game.player1.position['y']
-        self.update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
+        #print "CLIENT ID: " + str(self.client_id)
 
-        self.update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
-        self.update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
-        self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
+        if self.client_id == 1:
+            #print "SENDING TO CLIENT 1"
+            self.update_state['gameState']['playerData']['x'] = game.player2.position['x']
+            self.update_state['gameState']['playerData']['y'] = game.player2.position['y']
+            self.update_state['gameState']['playerData']['imgNum'] = game.player2.image_num
 
-        ud_st = json.dumps(self.update_state)
-        self.write_message(ud_st)
+            self.update_state['gameState']['otherPlayerData']['x'] = game.player1.position['x']
+            self.update_state['gameState']['otherPlayerData']['y'] = game.player1.position['y']
+            self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player1.image_num
+        else:
+            self.update_state['gameState']['playerData']['x'] = game.player1.position['x']
+            self.update_state['gameState']['playerData']['y'] = game.player1.position['y']
+            self.update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
+
+            self.update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
+            self.update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
+            self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
 
         game.update()
+
+        if game.game_lost:
+            lost = json.dumps(self.game_lost)
+            self.write_message(lost)
+            self.update_loop.stop()
+            print "YOU LOST"
+        elif game.wave_complete:
+            wc = json.dumps(self.wave_complete)
+            self.write_message(wc)
+            self.update_loop.stop()
+            print "YOU COMPLETED WAVE " + str(game.level_number)
+
+            next_level = game.level_number + 1
+            game.__init__()
+            game.level_number = next_level
+            game.populate_enemies()
+            game.spawn_enemies()
+            self.update_loop.start()
+        else:
+            ud_st = json.dumps(self.update_state)
+            self.write_message(ud_st)
+
+
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static')
