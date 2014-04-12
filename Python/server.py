@@ -173,6 +173,8 @@ class Enemy(object):
         self.distance = 0
         self.attack_wait = 0
         self.damage_interval = 0
+        self.image_wait = 0
+        self.image_interval = 0
 
     def closest_player(self, player1, player2):
         """Logic for determining which player the enemy will target"""
@@ -180,21 +182,17 @@ class Enemy(object):
         diff_y1 = player1.position['y'] - self.position['y']
 
         dist1 = math.sqrt(diff_x1**2 + diff_y1**2)
-        #print str(dist1)
 
         diff_x2 = player2.position['x'] - self.position['x']
         diff_y2 = player2.position['y'] - self.position['y']
 
         dist2 = math.sqrt(diff_x2**2 + diff_y2**2)
-        #print str(dist2)
 
         if dist1 <= dist2:
-            #print "Approaching player 1."
             self.distance = dist1
             self.pos_change['dx'] = diff_x1 / self.distance * self.speed
             self.pos_change['dy'] = diff_y1 / self.distance * self.speed
         else:
-            #print "Approaching player 2."
             self.distance = dist2
             self.pos_change['dx'] = diff_x2 / self.distance * self.speed
             self.pos_change['dy'] = diff_y2 / self.distance * self.speed
@@ -210,6 +208,7 @@ class GridBug(Enemy):
         self.speed = 1.7 * random.random() * 0.5
         self.distance_interval = 10
         self.damage_interval = 20
+        self.image_interval = 20
 
     def left_bound(self):
         return self.position['x'] + 23
@@ -248,6 +247,7 @@ class Roller(Enemy):
         self.speed = 1.7 + random.random() * 0.6
         self.distance_interval = 15
         self.damage_interval = 15
+        self.image_interval = 15
 
     def left_bound(self):
         if self.direction == 'north' or self.direction == 'south':
@@ -274,7 +274,7 @@ class Roller(Enemy):
             return self.position['y'] + 36
 
     def update_image(self):
-        """This is not going to work since it increases the imgNum everytime without reseting it
+        """ TODO This is not going to work since it increases the imgNum every time without resetting it
         Set the image to be displayed during a frame"""
         image_num = self.img_num
 
@@ -301,6 +301,7 @@ class Heavy(Enemy):
         self.speed = 0.2 * random.random() * 0.5
         self.distance_interval = None  # TODO to be defined
         self.damage_interval = 25
+        self.image_interval = 25
 
     def left_bound(self):  # TODO to be defined
         return None
@@ -350,8 +351,8 @@ class Game(object):
 
     def populate_enemies(self):
         """Populate enemies list randomly"""
-        hp_multiplier = 1
-        for i in range(0, 3**self.level_number):
+        hp_multiplier = self.level_number
+        for i in range(0, 6*self.level_number):
             num = random.random() * 2
 
             if num <= 1:
@@ -407,10 +408,13 @@ class Game(object):
         enemy.position['x'] += enemy.pos_change['dx']
         enemy.position['y'] += enemy.pos_change['dy']
         enemy.distance += enemy.speed
+
         if enemy.distance > enemy.distance_interval:
             enemy.distance -= enemy.distance_interval
-            enemy.img_num = (enemy.img_num + 1) % 2
-            enemy.update_image()
+            if enemy.image_wait >= enemy.image_interval:
+                enemy.image_wait = 0
+                enemy.img_num = (enemy.img_num + 1) % 2
+                enemy.update_image()
 
     def move_bullet(self, bullet):
         """Update bullet position and enemy health based on collisions"""
@@ -450,13 +454,11 @@ class Game(object):
     def collide_process(self, object1, object2):
         """Handle what should happen on collision between different objects"""
         if isinstance(object1, Player) and isinstance(object2, Enemy):
-            object2.attack_wait += 1
             if object2.attack_wait >= object2.damage_interval:
                 object2.attack_wait = 0
                 object1.health -= 1
                 object1.hit = True
         elif isinstance(object1, Enemy) and isinstance(object2, Player):
-            object1.attack_wait += 1
             if object1.attack_wait >= object1.damage_interval:
                 object1.attack_wait = 0
                 object2.health -= 1
@@ -480,6 +482,8 @@ class Game(object):
 
         for enemy in self.enemies:
             enemy.closest_player(self.player1, self.player2)
+            enemy.attack_wait += 1
+            enemy.image_wait += 1
             self.move_enemy(enemy)
             if enemy.hit:
                 enemy.hit = False
@@ -489,7 +493,6 @@ class Game(object):
 
             if self.check_collision(enemy, self.player2):
                 print "Player 2 Hit! Health now at " + str(self.player2.health)
-
 
         if self.player1.hit:
             self.player1.hit = False
@@ -588,8 +591,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                     client.write_message(out_msg)
                 game.populate_enemies()
                 game.spawn_enemies()
-                for client in clients_started:
-                    client.update_loop.start()
+                self.update_loop.start()
                 clients_started.__init__()
         elif in_msg['message'] == 'mousedown':
             if in_msg['clientID'] == 1:
@@ -702,7 +704,9 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             y=0
         )
 
-        self.update_state['gameState']['enemyData'] = []
+        for client in clients:
+            client.update_state['gameState']['enemyData'] = []
+
         for enemy in game.enemies:
             enemy_obj = {}
             enemy_obj['x'] = enemy.position['x']
@@ -714,50 +718,53 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                 enemy_obj['type'] = 'roller'
             elif type(enemy) is Heavy:
                 enemy_obj['type'] = 'heavy'
-            self.update_state['gameState']['enemyData'].append(enemy_obj)
 
-        self.update_state['gameState']['bulletData'] = []
+            for client in clients:
+                client.update_state['gameState']['enemyData'].append(enemy_obj)
+
+        for client in clients:
+            client.update_state['gameState']['bulletData'] = []
+
         for bullet in game.bullets:
             bullet_obj = {}
             bullet_obj['x'] = bullet.position['x']
             bullet_obj['y'] = bullet.position['y']
 
-            self.update_state['gameState']['bulletData'].append(bullet_obj)
+            for client in clients:
+                client.update_state['gameState']['bulletData'].append(bullet_obj)
 
+        print "CLIENT ID: " + str(self.client_id)
 
+        clients[0].update_state['gameState']['playerData']['x'] = game.player2.position['x']
+        clients[0].update_state['gameState']['playerData']['y'] = game.player2.position['y']
+        clients[0].update_state['gameState']['playerData']['imgNum'] = game.player2.image_num
 
-        #print len(self.update_state['gameState']['bulletData'])
+        clients[0].update_state['gameState']['otherPlayerData']['x'] = game.player1.position['x']
+        clients[0].update_state['gameState']['otherPlayerData']['y'] = game.player1.position['y']
+        clients[0].update_state['gameState']['otherPlayerData']['imgNum'] = game.player1.image_num
 
-        #print "CLIENT ID: " + str(self.client_id)
+        clients[1].update_state['gameState']['playerData']['x'] = game.player1.position['x']
+        clients[1].update_state['gameState']['playerData']['y'] = game.player1.position['y']
+        clients[1].update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
 
-        if self.client_id == 1:
-            #print "SENDING TO CLIENT 1"
-            self.update_state['gameState']['playerData']['x'] = game.player2.position['x']
-            self.update_state['gameState']['playerData']['y'] = game.player2.position['y']
-            self.update_state['gameState']['playerData']['imgNum'] = game.player2.image_num
-
-            self.update_state['gameState']['otherPlayerData']['x'] = game.player1.position['x']
-            self.update_state['gameState']['otherPlayerData']['y'] = game.player1.position['y']
-            self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player1.image_num
-        else:
-            self.update_state['gameState']['playerData']['x'] = game.player1.position['x']
-            self.update_state['gameState']['playerData']['y'] = game.player1.position['y']
-            self.update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
-
-            self.update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
-            self.update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
-            self.update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
-
-        game.update()
+        clients[1].update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
+        clients[1].update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
+        clients[1].update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
 
         if game.game_lost:
             lost = json.dumps(self.game_lost)
-            self.write_message(lost)
+            for client in clients:
+                client.write_message(lost)
+
             self.update_loop.stop()
             print "YOU LOST"
+
+            game.__init__()
         elif game.wave_complete:
             wc = json.dumps(self.wave_complete)
-            self.write_message(wc)
+            for client in clients:
+                client.write_message(wc)
+
             self.update_loop.stop()
             print "YOU COMPLETED WAVE " + str(game.level_number)
 
@@ -768,9 +775,11 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             game.spawn_enemies()
             self.update_loop.start()
         else:
-            ud_st = json.dumps(self.update_state)
-            self.write_message(ud_st)
+            for client in clients:
+                ud_st = json.dumps(client.update_state)
+                client.write_message(ud_st)
 
+        game.update()
 
 
 settings = {
