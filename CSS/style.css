@@ -8,15 +8,9 @@ body{
 	position: relative;
 }
 
-#left_panel{
-	position: absolute;
-	background: #DBD2CB;
-	border-radius: 5px;
-}
-
 #right_panel{
 	position: absolute;
-	background: #DBD2CB;
+	background: #262B3D;
 	border-radius: 5px;
 }
 
@@ -25,5 +19,9 @@ body{
 	top: 0px;
 	left: 150px;
 	margin: auto;
+	position: absolute;
+}
+
+#controls{
 	position: absolute;
 }
