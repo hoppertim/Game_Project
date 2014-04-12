@@ -6,18 +6,23 @@ $(document).ready(function(){
   var clientId;
 
   //Load the images that will be used in the game
-  var playerImg = [new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
+  var playerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
       rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
                     new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
       gridBugImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
+	  audio = [new Audio(), new Audio(), new Audio(), new Audio(), new Audio(), new Audio()],	//MODIFIED BY OH
       wallHorizontal = new Image(),
       wallVertical = new Image(),
       backgroundPattern = new Image();
 
-  playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';
+  playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';//KEEP IMAGE ORDERS for now.
   playerImg[1].src = 'static/SPRITES/player/p1_stand_W.png';
   playerImg[2].src = 'static/SPRITES/player/p1_stand_E.png';
   playerImg[3].src = 'static/SPRITES/player/p1_stand_S.png';
+  playerImg[4].src = 'static/SPRITES/PLAYER/p1_stand_hit_N.png';
+  playerImg[5].src = 'static/SPRITES/PLAYER/p1_stand_hit_W.png';
+  playerImg[6].src = 'static/SPRITES/PLAYER/p1_stand_hit_E.png';
+  playerImg[7].src = 'static/SPRITES/PLAYER/p1_stand_hit_S.png';
   rollerImg[0].src = 'static/SPRITES/roller/roller_E1.png';
   rollerImg[1].src = 'static/SPRITES/roller/roller_E2.png';
   rollerImg[2].src = 'static/SPRITES/roller/roller_W1.png';
@@ -45,6 +50,13 @@ $(document).ready(function(){
   wallHorizontal.src = 'static/IMG/wall_horizontal.png';
   wallVertical.src = 'static/IMG/wall_vertical.png';
   backgroundPattern.src = 'static/IMG/backgroundPattern.png';
+  audio[0].src = 'static/AUDIO/dusty_beats.mp3';  //background music
+  audio[1].src = '';  //pistol shoot
+  audio[2].src = '';  //player hit
+  audio[3].src = '';  //enemy hit
+  audio[4].src = 'static/AUDIO/game_over.wav';
+  audio[0].autoplay = true;
+  audio[0].loop = true;
 
   var ws = new WebSocket('ws://' + document.location.host + '/game');
 
@@ -61,27 +73,34 @@ $(document).ready(function(){
       'height': height + 'px',
       'width': width + 'px'
     });
+/*
     $('#left_panel').css({
       'top': (10 * sizeFactor) + 'px',
       'left': (10 * sizeFactor) + 'px',
       'width': (138 * sizeFactor) + 'px',
       'height': (580 * sizeFactor) + 'px'
     });
+*/
     $('#right_panel').css({
       'top': (10 * sizeFactor) + 'px',
-      'left': (1152 * sizeFactor) + 'px',
-      'width': (138 * sizeFactor) + 'px',
+      'left': (1014 * sizeFactor) + 'px',	//MODIFIED BY OH
+      'width': (282 * sizeFactor) + 'px',	//MODIFIED BY OH
       'height': (580 * sizeFactor) + 'px'
-    });
+    }).hide();
     $('#play_area').css({
       'top': '0px',
-      'left': (150 * sizeFactor) + 'px',
+      //'left': (150 * sizeFactor) + 'px',
       'width': (1000 * sizeFactor) + 'px',
       'height': height + 'px',
-      'backgroundImage': 'url("static/IMG/background.jpg")',
+      'backgroundImage': 'url("static/IMG/background_neonbit.png")',
       'backgroundSize' : (1000 * sizeFactor) + 'px ' + (600 * sizeFactor) + 'px',
       'backgroundRepeat': 'no-repeat'
     });
+	$('#controls').css({				//ADDED BY OH
+	  'top': (200 * sizeFactor) + 'px',
+	  'left': (35 * sizeFactor) + 'px'
+	});
+				  
     displayTitle();
   }
 
@@ -89,7 +108,7 @@ $(document).ready(function(){
   function displayTitle() {
     $('title').text('Main Menu');
     $('#play_area').css({
-      'backgroundImage': 'url("static/IMG/background.jpg")'
+      'backgroundImage': 'url("static/IMG/background_neonbit.png")'
     });
     var sizeFactor =  window.innerWidth / 1366;
 
@@ -219,7 +238,7 @@ $(document).ready(function(){
       y: 60 * sizeFactor,
       width: 400 * sizeFactor,
       align: 'center',
-      fontFamily: 'Calibri',
+      fontFamily: 'Monaco',		//not sure if this font is available...
       fontSize: 64 * sizeFactor,
       text: 'Title Name',
       fill: 'red',
@@ -531,7 +550,7 @@ $(document).ready(function(){
   function displayHowToPlay(){
     $('title').text('How to Play');
     $('#play_area').css({
-      'backgroundImage': 'url("static/IMG/background.jpg")'
+      'backgroundImage': 'url("static/IMG/background_neonbit.png")'
     });
 
     var sizeFactor = window.innerWidth / 1366;
@@ -573,7 +592,7 @@ $(document).ready(function(){
         y: 3 * sizeFactor
       },
       shadowOpacity: .4,
-      fontFamily: 'Calibri',
+      fontFamily: 'Monaco',		//MODIFIED BY OH
       fontStyle: 'bold'
     });
 
@@ -588,8 +607,8 @@ $(document).ready(function(){
     var textFill = new Kinetic.Rect({
       width: 600 * sizeFactor,
       height: 408 * sizeFactor,
-      fill: '#DBD2CB',
-      opacity: .3 * sizeFactor,
+	  fill: '#000000',			//MODIFIED by OH	//possibly 2B263D
+	  opacity: .7 * sizeFactor,	//MODIFIED by OH
       cornerRadius: 10
     });
 
@@ -600,8 +619,8 @@ $(document).ready(function(){
       height: 388 * sizeFactor,
       text: '',
       fill: 'white',
-      fontSize: 22 * sizeFactor,
-      fontFamily: 'Calibri'
+      fontSize: 18 * sizeFactor,	//MODIFIED BY OH
+      fontFamily: 'Monaco'			//MODIFIED BY OH
     });
 
     var objectiveBorder = new Kinetic.Rect({
@@ -677,7 +696,7 @@ $(document).ready(function(){
         objectiveText.x(7 * sizeFactor);
         objectiveText.y(26 * sizeFactor);
         objectiveText.width(101 * sizeFactor);
-        textInfo.text('Info about the objective of the game');
+        textInfo.text('    Survive as long as you can against waves of enemies that only want you deleted. Gain money by clearing rounds to purchase armor and weapon upgrades. Fend off the hordes yourself, or play co-op with a friend. \n\n<insert flavor text>');
         foreground.batchDraw();
       }
     });
@@ -755,7 +774,7 @@ $(document).ready(function(){
         controlsText.x(7 * sizeFactor);
         controlsText.y(94 * sizeFactor);
         controlsText.width(101 * sizeFactor);
-        textInfo.text('Info about the controls of the game');
+        textInfo.text('\n  w        move up\n\n  a        move left\n\n  s        move down\n\n  d        move right\n\n  e        change weapon\n\n  space    sprint (cannot shoot while sprinting)\n\n  mouse    aim weapon, click to shoot');
         foreground.batchDraw();
       }
     });
@@ -779,7 +798,7 @@ $(document).ready(function(){
       x: 3 * sizeFactor,
       y: 160 * sizeFactor,
       width: 104 * sizeFactor,
-      text: 'Guns',
+      text: 'Weapons',					//MODIFIED BY OH
       fill: 'white',
       fontSize: 20 * sizeFactor,
       fontFamily: 'Calibri',
@@ -833,7 +852,7 @@ $(document).ready(function(){
         gunsText.x(7 * sizeFactor);
         gunsText.y(162 * sizeFactor);
         gunsText.width(101 * sizeFactor);
-        textInfo.text('Info about the guns of the game');
+        textInfo.text('\n  pistol         your standard weapon. decent damage,\n                 unlimited ammo.\n\n\n  (rest still not implemented)\n\n\n\n  machine gun    continuous rate of fire, low damage,\n                 (un)limited ammo.\n\n  shotgun\n\n  grenade launcher\n\n  gatling gun');
         foreground.batchDraw();
       }
     });
@@ -911,7 +930,7 @@ $(document).ready(function(){
         armorText.x(7 * sizeFactor);
         armorText.y(230 * sizeFactor);
         armorText.width(101 * sizeFactor);
-        textInfo.text('Info about the armor in the game');
+        textInfo.text('\n  (still not implemented)\n\n  basic\n\n  invisibility\n\n  poison\n\n  hyper');
         foreground.batchDraw();
       }
     });
@@ -989,7 +1008,7 @@ $(document).ready(function(){
         turretsText.x(7 * sizeFactor);
         turretsText.y(298 * sizeFactor);
         turretsText.width(101 * sizeFactor);
-        textInfo.text('Info about the turrets in the game');
+        textInfo.text('\n  (still not implemented)\n\n  basic\n\n  stunner\n\n  rapid\n\n  bomb');
         foreground.batchDraw();
       }
     });
@@ -1265,6 +1284,17 @@ $(document).ready(function(){
         playAreaWidth = 1200, //1500
         playAreaHeight = 800; //960
     
+	//commented out, because i'm not sure if this has been implemented yet.
+		//wait... this may be for game computation. probably don't need it for clientside.
+	/*
+	 //variables used to hold information about the level
+	 var lvlComplete = false,
+		lvlNumber = 1;
+	 if(gameState.lvlNumber != undefined){
+		lvlNumber = gameState.lvlNumber;
+	 }
+	 */
+				  
     //variables used to control the fog that the player can see
     var fogSize = 400,
         fog = [];
@@ -1293,6 +1323,12 @@ $(document).ready(function(){
       'heigth': height
       //'cursor': 'url(../IMG/gunsight.png), crosshair'
     });
+	$('#play_area').animate({
+	  'left': (12 * sizeFactor) + 'px'
+	}, 300, 'swing', function(){
+	  $('#right_panel').slideDown(300);
+	  playAreaOffset = $('#play_area').offset();
+	});
 
     //creates the stage to hold the how to play screen
     var stage = new Kinetic.Stage({container: 'play_area', width: 1000 * sizeFactor, height: 600 * sizeFactor});
@@ -1313,6 +1349,11 @@ $(document).ready(function(){
     //layer used to hold the fog
     var fogLayer = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height:height}, opacity: .9});
 
+	/*
+	 //layer used to hold hp bar...
+	 var infoLayer = new Kinetic.Layer({x: 0, y: 0, width: width, height: height, opacity: .8});
+	 */
+				  
     /*
      * Self invoking anonymouse function used to populate the layers with the player, walls, and fog
      */
@@ -1355,6 +1396,12 @@ $(document).ready(function(){
       //creates the player and adds him to the foreground
       player = new createPlayer(gameState.player.x, gameState.player.y);
       foreground.add(player.obj);
+	 
+	 /*
+	  //add info stuff to info layer
+      infoLayer.add(gameState.player.healthBar);
+      infoLayer.add(gameState.player.healthBarBorder);
+	  */
 
       //creates the other player if it is a two player game
       if(numPlayers == 2){
@@ -1377,6 +1424,23 @@ $(document).ready(function(){
         image: playerImg[0]
       });
       this.direction = 'up';
+	  /*
+	  this.healthBarBorder = new Kinetic.Rect({
+		x: (width - 200) * sizeFactor - 2,
+		y: (height - 50) * sizeFactor - 2,
+		width: 150 + 4,
+		height: 20 + 4,
+		strokeWidth: 4,
+		stroke: 'black'
+	  });
+	  this.healthBar = new Kinetic.Rect({
+		x: (width - 200) * sizeFactor,
+		y: (height - 50) * sizeFactor,
+		width: 150,
+		height: 20,
+		fill: 'red'
+	  });
+	   */
     };
 
     function createWall(x, y, type){
@@ -1733,6 +1797,11 @@ $(document).ready(function(){
         }
         redraw();
       }
+	  if(data.message == 'gameLost'){
+		$('#play_area').fadeOut();
+		audio[0].pause();
+		audio[4].play();
+	  }
     };
 
   };
