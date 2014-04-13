@@ -251,30 +251,30 @@ $(document).ready(function(){
 		});
 
 		var waitingScreen = new Kinetic.Group({
-			x: 300 * sizeFactor,
+			x: 200 * sizeFactor,
 			y: 100 * sizeFactor,
 			height: 400 * sizeFactor,
-			width: 400 * sizeFactor
+			width: 600 * sizeFactor
 		});
 
-		var waitingScreenBackgrond = new Kinetic.Rect({
+		var waitingScreenBackground = new Kinetic.Rect({
 			x: 0, 
 			y: 0,
 			height: 400 * sizeFactor,
-			width: 400 * sizeFactor,
+			width: 600 * sizeFactor,
 			fill: 'black' //todo: choose color
 		});
 
 		var waitingScreenText = new Kinetic.Text({
-			x: 0,
-			y: 0,
+			x: 100 * sizeFactor,
+			y: 50 * sizeFactor,
 			height: 300 * sizeFactor,
 			width: 400 * sizeFactor,
 			align: 'center',
 			fontFamily: 'Monaco',
-			fontSize: 4 * sizeFactor,
-			text: 'WAITING FOR OTHER PLAYER',
-			fill: ' red',
+			fontSize: 64 * sizeFactor,
+			text: 'WAITING FOR/nOTHER PLAYER',
+			fill: 'red',
 			fontStyle: 'bold',
 			shadowOpacity: .4,
 			shadowOffset: {
@@ -286,7 +286,7 @@ $(document).ready(function(){
 		/*
 		* Add the Kinetic objects to the layer and stages
 		*/
-		waitingScreen.add(waitingScreenBackgrond)
+		waitingScreen.add(waitingScreenBackground)
 			.add(waitingScreenText);
 		foreground.add(singlePlayerText)
 			.add(singlePlayer)
@@ -298,6 +298,7 @@ $(document).ready(function(){
 			.add(waitingScreen);
 		stage.add(foreground);
 		waitingScreen.hide();
+		foreground.batchDraw();
 
 		/*
 		* add events to the buttons here
@@ -1385,10 +1386,111 @@ $(document).ready(function(){
 		//layer used to hold the fog
 		var fogLayer = new Kinetic.Layer({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, clip: {x: 0, y: 0, width: width, height:height}, opacity: .9});
 
-		/*
 		//layer used to hold hp bar...
 		var infoLayer = new Kinetic.Layer({x: 0, y: 0, width: width, height: height, opacity: .8});
-		*/
+		var levelComplete = new Kinetic.Group({x:200 * sizeFactor, y: 100 * sizeFactor, width: 600 * sizeFactor, height: 400 * sizeFactor, visible: false});
+		var levelCompleteBackground = new Kinetic.Rect({
+			x: 0,
+			y: 0,
+			width: 600 * sizeFactor,
+			height: 400 * sizeFactor,
+			fill: 'black'
+		});
+		var levelCompleteContinue = new Kinetic.Rect({
+			x: 75 * sizeFactor,
+			y: 250 * sizeFactor,
+			width: 150 * sizeFactor,
+			height: 75 * sizeFactor,
+			stroke: 'white',
+			strokeWidth: 4 * sizeFactor,
+			cornerRadius: 2,
+			opacity: .6,
+			shadowColor: '#000000',
+			shadowOpacity: .4,
+			shadowOffset: {
+				x: 8 * sizeFactor,
+				y: 8 * sizeFactor
+			}
+		});
+		var levelCompleteQuit = new Kinetic.Rect({
+			x: 375 * sizeFactor,
+			y: 250 * sizeFactor,
+			width: 150 * sizeFactor,
+			height: 75 * sizeFactor,
+			stroke: 'white',
+			strokeWidth: 4 * sizeFactor,
+			cornerRadius: 2,
+			opacity: .6,
+			shadowColor: '#000000',
+			shadowOpacity: .4,
+			shadowOffset: {
+				x: 8 * sizeFactor,
+				y: 8 * sizeFactor
+			}
+		});
+		var levelCompleteText = new Kinetic.Text({
+			x: 100 * sizeFactor,
+			y: 50 * sizeFactor,
+			width: 400 * sizeFactor,
+			align: 'center',
+			fontFamily: 'Calibri',
+			fontSize: 24 * sizeFactor,
+			text: 'Level Complete',
+			fill: 'white',
+			shadowColor: '#000000',
+			shadowOffset: {
+				x: 4 * sizeFactor,
+				y: 4 * sizeFactor
+			}
+		});
+		var continueText = new Kinetic.Text({
+			x: 75 * sizeFactor,
+			y: 250 * sizeFactor,
+			width: 150 * sizeFactor,
+			align: 'center',
+			fontFamily: 'Calibri',
+			fontSize: 24 * sizeFactor,
+			text: 'Continue',
+			fill: 'white',
+			shadowColor: '#000000',
+			shadowOffset: {
+				x: 4 * sizeFactor,
+				y: 4 * sizeFactor
+			}
+		});
+
+		levelCompleteContinue.on('click', function(){
+			var data = JSON.stringify({
+				'clientID': clientId,
+				'message': 'nextWave'
+			});
+			ws.send(data);
+		});
+
+		var quitText = new Kinetic.Text({
+			x: 375 * sizeFactor,
+			y: 250 * sizeFactor,
+			width: 150 * sizeFactor,
+			align: 'center',
+			fontFamily: 'Calibri',
+			fontSize: 24 * sizeFactor,
+			text: 'Quit',
+			fill: 'white',
+			shadowColor: '#000000',
+			shadowOffset: {
+				x: 4 * sizeFactor,
+				y: 4 * sizeFactor
+			}
+		});
+		levelComplete.add(levelCompleteBackground)
+			.add(continueText)
+			.add(quitText)
+			.add(levelCompleteQuit)
+			.add(levelCompleteContinue)
+			.add(levelCompleteText);
+		infoLayer.add(levelComplete);
+
+
 
 		/*
 		* Self invoking anonymouse function used to populate the layers with the player, walls, and fog
@@ -1430,53 +1532,56 @@ $(document).ready(function(){
 			}
 
 			//creates the player and adds him to the foreground
-			player = new createPlayer(gameState.player.x, gameState.player.y);
+			player = new createPlayer(gameState.player, 1);
 			foreground.add(player.obj);
 
-			/*
 			//add info stuff to info layer
-			infoLayer.add(gameState.player.healthBar);
-			infoLayer.add(gameState.player.healthBarBorder);
-			*/
+			infoLayer.add(player.healthBar);
+			infoLayer.add(player.healthBarBorder);
 
 			//creates the other player if it is a two player game
 			if(numPlayers == 2){
-				otherPlayer = new createPlayer(gameState.otherPlayer.x, gameState.otherPlayer.y);
+				otherPlayer = new createPlayer(gameState.otherPlayer, 2);
 				foreground.add(otherPlayer.obj);
+				infoLayer.add(otherPlayer.healthBar)
+					.add(otherPlayer.healthBarBorder);
 			}
 
 			//add the layers to the stage
-			stage.add(background).add(foreground).add(fogLayer);
+			stage.add(background).add(foreground).add(fogLayer).add(infoLayer);
 			redraw();
 		})();
 
 		//constructor functions to create a Player
-		function createPlayer(x, y){
+		function createPlayer(playerData, playerNum){
 			this.obj = new Kinetic.Image({
-			x: 500 * sizeFactor - imageSize / 2,
-			y: 300 * sizeFactor - imageSize / 2,
-			width: imageSize,
-			height: imageSize,
-			image: playerImg[0]
+				x: playerData.x,
+				y: playerData.y,
+				width: imageSize,
+				height: imageSize,
+				image: playerImg[0]
 			});
 			this.direction = 'up';
-			/*
+			this.maxHp = playerData.health;
 			this.healthBarBorder = new Kinetic.Rect({
-			x: (width - 200) * sizeFactor - 2,
-			y: (height - 50) * sizeFactor - 2,
-			width: 150 + 4,
-			height: 20 + 4,
-			strokeWidth: 4,
-			stroke: 'black'
+				x: (width - 200) * sizeFactor - 2,
+				y: (height - 60) * sizeFactor - 2,
+				width: 154 * sizeFactor,
+				height: 24 * sizeFactor,
+				strokeWidth: 4,
+				stroke: 'black'
 			});
 			this.healthBar = new Kinetic.Rect({
-			x: (width - 200) * sizeFactor,
-			y: (height - 50) * sizeFactor,
-			width: 150,
-			height: 20,
-			fill: 'red'
+				x: (width - 200) * sizeFactor,
+				y: (height - 60) * sizeFactor,
+				width: 150 * sizeFactor,
+				height: 20 * sizeFactor,
+				fill: 'red'
 			});
-			*/
+			if(playerNum == 2){
+				this.healthBarBorder.y((height - 30) * sizeFactor);
+				this.healthBar.y((height - 30) * sizeFactor).fill('blue');
+			}
 		};
 
 		function createWall(x, y, type){
@@ -1580,6 +1685,7 @@ $(document).ready(function(){
 			background.y(posY);
 			background.clipY(clipY);
 			player.obj.image(playerImg[playerData.imgNum]);
+			player.healthBar.width(150 * playerData.health / player.maxHp);
 		};
 
 		//function used to update the appearance of the fog based on the player's position
@@ -1794,12 +1900,16 @@ $(document).ready(function(){
 			background.batchDraw();
 			foreground.batchDraw();
 			fogLayer.batchDraw();
+			infoLayer.batchDraw();
 		}
 
 		ws.onmessage = function(msg){
 			var data = JSON.parse(msg.data);
 			//console.log(data);
 			if(data.message == 'updateState'){
+                if (levelComplete.isVisible()){
+                    levelComplete.hide()
+                }
 				var gameState = data.gameState,
 				enemyData = gameState.enemyData,
 				bulletData = gameState.bulletData,
@@ -1827,11 +1937,13 @@ $(document).ready(function(){
 					bulletGroup.add(bullet);
 				}
 				redraw();
-			}
-			if(data.message == 'gameLost'){
+			}else if(data.message == 'gameLost'){
 				$('#play_area').fadeOut();
 				audio[0].pause();
 				audio[4].play();
+			}else if(data.message == 'waveComplete'){
+				levelComplete.show();
+				infoLayer.batchDraw();
 			}
 		};
 	};
