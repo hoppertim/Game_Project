@@ -251,20 +251,53 @@ $(document).ready(function(){
 		});
 
 		var waitingScreen = new Kinetic.Group({
-
+			x: 300 * sizeFactor,
+			y: 100 * sizeFactor,
+			height: 400 * sizeFactor,
+			width: 400 * sizeFactor
 		});
+
+		var waitingScreenBackgrond = new Kinetic.Rect({
+			x: 0, 
+			y: 0,
+			height: 400 * sizeFactor,
+			width: 400 * sizeFactor,
+			fill: 'black' //todo: choose color
+		});
+
+		var waitingScreenText = new Kinetic.Text({
+			x: 0,
+			y: 0,
+			height: 300 * sizeFactor,
+			width: 400 * sizeFactor,
+			align: 'center',
+			fontFamily: 'Monaco',
+			fontSize: 4 * sizeFactor,
+			text: 'WAITING FOR OTHER PLAYER',
+			fill: ' red',
+			fontStyle: 'bold',
+			shadowOpacity: .4,
+			shadowOffset: {
+				x: 3 * sizeFactor,
+				y: 3 * sizeFactor
+			}
+		})
 
 		/*
 		* Add the Kinetic objects to the layer and stages
 		*/
+		waitingScreen.add(waitingScreenBackgrond)
+			.add(waitingScreenText);
 		foreground.add(singlePlayerText)
 			.add(singlePlayer)
 			.add(twoPlayerText)
 			.add(twoPlayer)
 			.add(howToPlayText)
 			.add(howToPlay)
-			.add(title);
+			.add(title)
+			.add(waitingScreen);
 		stage.add(foreground);
+		waitingScreen.hide();
 
 		/*
 		* add events to the buttons here
@@ -535,6 +568,7 @@ $(document).ready(function(){
 		});
 
 		twoPlayer.on('click', function(){
+			waitingScreen.show();
 			var data = JSON.stringify({
 				'clientID': clientId,
 				'message': 'twoPlayerGame'
