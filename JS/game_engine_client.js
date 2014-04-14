@@ -1907,15 +1907,9 @@ $(document).ready(function(){
 			var data = JSON.parse(msg.data);
 			//console.log(data);
 			if(data.message == 'updateState'){
-<<<<<<< HEAD
 				if(levelComplete.isVisible()){
 					levelComplete.hide();
 				}
-=======
-                if (levelComplete.isVisible()){
-                    levelComplete.hide()
-                }
->>>>>>> 298be74690e34f694d3f63cdf2c982a895409d2f
 				var gameState = data.gameState,
 				enemyData = gameState.enemyData,
 				bulletData = gameState.bulletData,
