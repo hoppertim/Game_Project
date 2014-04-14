@@ -73,14 +73,6 @@ $(document).ready(function(){
 			'height': height + 'px',
 			'width': width + 'px'
 		});
-		/*
-		$('#left_panel').css({
-		'top': (10 * sizeFactor) + 'px',
-		'left': (10 * sizeFactor) + 'px',
-		'width': (138 * sizeFactor) + 'px',
-		'height': (580 * sizeFactor) + 'px'
-		});
-		*/
 		$('#right_panel').css({
 			'top': (10 * sizeFactor) + 'px',
 			'left': (1014 * sizeFactor) + 'px',	//MODIFIED BY OH
@@ -1235,8 +1227,7 @@ $(document).ready(function(){
 			'width': width,
 			'heigth': height
 			//'cursor': 'url(../IMG/gunsight.png), crosshair'
-		});
-		$('#play_area').animate({
+		}).animate({
 			'left': (12 * sizeFactor) + 'px'
 		}, 300, 'swing', function(){
 			$('#right_panel').slideDown(300);
@@ -1567,7 +1558,7 @@ $(document).ready(function(){
 			background.y(posY);
 			background.clipY(clipY);
 			player.obj.image(playerImg[playerData.imgNum]);
-			player.healthBar.width(150 * playerData.health / player.maxHp);
+			player.healthBar.width(150 * playerData.health / player.maxHp * sizeFactor);
 		};
 
 		//function used to update the appearance of the fog based on the player's position
@@ -1831,6 +1822,12 @@ $(document).ready(function(){
 					$('#play_area').off('mousedown mouseup mousemove');
 					$(document).off('keydown keyup');
 					$('#play_area').fadeIn();
+					$('#right_panel').slideUp(300, function(){
+						$('#play_area').animate({
+							'left': (150 * sizeFactor) + 'px'
+						}, 300);
+						playAreaOffset = $('#play_area').offset();
+					});
 					displayTitle();
 				}, 3000);
 			}else if(data.message == 'waveComplete'){
