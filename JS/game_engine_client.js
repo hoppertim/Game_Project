@@ -1941,6 +1941,12 @@ $(document).ready(function(){
 				$('#play_area').fadeOut();
 				audio[0].pause();
 				audio[4].play();
+				setTimeout(function(){
+					audio[4].pause();
+					audio[4].currentTime = 0;
+					audio[0].play();
+					displayTitle();
+				}, 3000);
 			}else if(data.message == 'waveComplete'){
 				levelComplete.show();
 				infoLayer.batchDraw();
