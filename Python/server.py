@@ -18,7 +18,7 @@ KEY_SPACE = 32
 
 from tornado.options import define, options, parse_command_line
 
-define("port", default=8888, help="run on the given port", type=int)
+define("port", default=11000, help="run on the given port", type=int)
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -35,18 +35,19 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
         super(WebSocketGameHandler, self).__init__(application, request, **kwargs)
         self.client_id = 0
+        self.wave_wait = 0
         self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, 40)
         self.initial_state_1p = dict(
             message='singlePlayerGame',
             gameState=dict(
-                player=dict(x=game.player1.position['x'], y=game.player1.position['y'])
+                player=dict(x=game.player1.position['x'], y=game.player1.position['y'], health=100)
             )
         )
         self.initial_state_2p = dict(
             message='twoPlayerGame',
             gameState=dict(
-                player=dict(x=game.player1.position['x'], y=game.player1.position['y']),
-                otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'])
+                player=dict(x=game.player1.position['x'], y=game.player1.position['y'], health=100),
+                otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'], health=100)
             )
         )
         self.update_state = dict(
@@ -54,8 +55,8 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             gameState=dict(
                 enemyData=[],
                 bulletData=[],
-                playerData=dict(x=0, y=0, imgNum=0),
-                otherPlayerData=dict(x=0, y=0, imgNum=0)
+                playerData=dict(x=0, y=0, imgNum=0, health=100),
+                otherPlayerData=dict(x=0, y=0, imgNum=0, health=100)
             )
         )
 
@@ -103,6 +104,13 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                     client.write_message(out_msg)
                 game.populate_enemies()
                 game.spawn_enemies()
+                self.update_loop.start()
+                clients_started.__init__()
+        elif in_msg['message'] == 'nextWave':
+            print "Start next wave!"
+            if self not in clients_started:
+                clients_started.append(self)
+            if len(clients_started) == 2:
                 self.update_loop.start()
                 clients_started.__init__()
         elif in_msg['message'] == 'mousedown':
@@ -250,18 +258,22 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         clients[0].update_state['gameState']['playerData']['x'] = game.player2.position['x']
         clients[0].update_state['gameState']['playerData']['y'] = game.player2.position['y']
         clients[0].update_state['gameState']['playerData']['imgNum'] = game.player2.image_num
+        clients[0].update_state['gameState']['playerData']['health'] = game.player2.health
 
         clients[0].update_state['gameState']['otherPlayerData']['x'] = game.player1.position['x']
         clients[0].update_state['gameState']['otherPlayerData']['y'] = game.player1.position['y']
         clients[0].update_state['gameState']['otherPlayerData']['imgNum'] = game.player1.image_num
+        clients[0].update_state['gameState']['otherPlayerData']['health'] = game.player1.health
 
         clients[1].update_state['gameState']['playerData']['x'] = game.player1.position['x']
         clients[1].update_state['gameState']['playerData']['y'] = game.player1.position['y']
         clients[1].update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
+        clients[1].update_state['gameState']['playerData']['health'] = game.player1.health
 
         clients[1].update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
         clients[1].update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
         clients[1].update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
+        clients[1].update_state['gameState']['otherPlayerData']['health'] = game.player2.health
 
         if game.game_lost:
             lost = json.dumps(self.game_lost)
@@ -274,18 +286,26 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             game.__init__()
         elif game.wave_complete:
             wc = json.dumps(self.wave_complete)
-            for client in clients:
-                client.write_message(wc)
+            self.wave_wait += 1
+            if self.wave_wait >= 50:
+                self.wave_wait = 0
 
-            self.update_loop.stop()
-            print "YOU COMPLETED WAVE " + str(game.level_number)
+                for client in clients:
+                    client.write_message(wc)
 
-            next_level = game.level_number + 1
-            game.__init__()
-            game.level_number = next_level
-            game.populate_enemies()
-            game.spawn_enemies()
-            self.update_loop.start()
+                self.update_loop.stop()
+                print "YOU COMPLETED WAVE " + str(game.level_number)
+
+                next_level = game.level_number + 1
+                game.__init__()
+                game.level_number = next_level
+                game.populate_enemies()
+                game.spawn_enemies()
+                #self.update_loop.start()
+            else:
+                for client in clients:
+                    ud_st = json.dumps(client.update_state)
+                    client.write_message(ud_st)
         else:
             for client in clients:
                 ud_st = json.dumps(client.update_state)
