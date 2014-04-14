@@ -10,12 +10,12 @@ $(document).ready(function(){
 	rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
 	new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
 	gridBugImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
-	audio = [new Audio(), new Audio(), new Audio(), new Audio(), new Audio(), new Audio()],	//MODIFIED BY OH
+	audio = [new Audio(), new Audio(), new Audio(), new Audio(), new Audio(), new Audio()],
 	wallHorizontal = new Image(),
 	wallVertical = new Image(),
 	backgroundPattern = new Image();
 
-	playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';//KEEP IMAGE ORDERS for now.
+	playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';
 	playerImg[1].src = 'static/SPRITES/player/p1_stand_W.png';
 	playerImg[2].src = 'static/SPRITES/player/p1_stand_E.png';
 	playerImg[3].src = 'static/SPRITES/player/p1_stand_S.png';
@@ -75,8 +75,8 @@ $(document).ready(function(){
 		});
 		$('#right_panel').css({
 			'top': (10 * sizeFactor) + 'px',
-			'left': (1014 * sizeFactor) + 'px',	//MODIFIED BY OH
-			'width': (282 * sizeFactor) + 'px',	//MODIFIED BY OH
+			'left': (1014 * sizeFactor) + 'px',
+			'width': (282 * sizeFactor) + 'px',
 			'height': (580 * sizeFactor) + 'px'
 		}).hide();
 		$('#play_area').css({
@@ -88,7 +88,7 @@ $(document).ready(function(){
 			'backgroundSize' : (1000 * sizeFactor) + 'px ' + (600 * sizeFactor) + 'px',
 			'backgroundRepeat': 'no-repeat'
 		});
-		$('#controls').css({				//ADDED BY OH
+		$('#controls').css({
 			'top': (200 * sizeFactor) + 'px',
 			'left': (35 * sizeFactor) + 'px'
 		});
@@ -194,7 +194,7 @@ $(document).ready(function(){
 			y: 60 * sizeFactor,
 			width: 400 * sizeFactor,
 			align: 'center',
-			fontFamily: 'Monaco',		//not sure if this font is available...
+			fontFamily: 'Monaco',
 			fontSize: 64 * sizeFactor,
 			text: 'Title Name',
 			fill: 'red',
@@ -414,7 +414,6 @@ $(document).ready(function(){
 
 		ws.onmessage = function(msg){
 			var data = JSON.parse(msg.data);
-			//console.log(data);
 			if(data.clientID){
 				console.log("Client id: " + data.clientID);
 				clientId = data.clientID;
@@ -702,7 +701,7 @@ $(document).ready(function(){
 			x: 3 * sizeFactor,
 			y: 160 * sizeFactor,
 			width: 104 * sizeFactor,
-			text: 'Weapons',					//MODIFIED BY OH
+			text: 'Weapons',
 			fill: 'white',
 			fontSize: 20 * sizeFactor,
 			fontFamily: 'Calibri',
@@ -1188,17 +1187,6 @@ $(document).ready(function(){
 		playAreaOffset = $('#play_area').offset(),
 		playAreaWidth = 1200, //1500
 		playAreaHeight = 800; //960
-
-		//commented out, because i'm not sure if this has been implemented yet.
-		//wait... this may be for game computation. probably don't need it for clientside.
-		/*
-		//variables used to hold information about the level
-		var lvlComplete = false,
-		lvlNumber = 1;
-		if(gameState.lvlNumber != undefined){
-		lvlNumber = gameState.lvlNumber;
-		}
-		*/
 
 		//variables used to control the fog that the player can see
 		var fogSize = 400,
