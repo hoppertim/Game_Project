@@ -218,7 +218,8 @@ $(document).ready(function(){
 			x: 200 * sizeFactor,
 			y: 100 * sizeFactor,
 			height: 400 * sizeFactor,
-			width: 600 * sizeFactor
+			width: 600 * sizeFactor,
+			visible: false
 		});
 
 		var waitingScreenBackground = new Kinetic.Rect({
@@ -259,7 +260,6 @@ $(document).ready(function(){
 			.add(title)
 			.add(waitingScreen);
 		stage.add(foreground);
-		waitingScreen.hide();
 		foreground.batchDraw();
 
 		/*
@@ -1288,7 +1288,6 @@ $(document).ready(function(){
 				y: 8 * sizeFactor
 			}
 		});
-		
 		var levelCompleteText = new Kinetic.Text({
 			x: 100 * sizeFactor,
 			y: 50 * sizeFactor,
@@ -1304,6 +1303,7 @@ $(document).ready(function(){
 				y: 4 * sizeFactor
 			}
 		});
+
 		var continueText = new Kinetic.Text({
 			x: 225 * sizeFactor,
 			y: 250 * sizeFactor,
@@ -1326,13 +1326,51 @@ $(document).ready(function(){
 				'message': 'nextWave'
 			});
 			ws.send(data);
+			waitingScreen.show();
+			infoLayer.batchDraw();
 		});
+
+		var waitingScreen = new Kinetic.Group({
+			x: 200 * sizeFactor,
+			y: 100 * sizeFactor,
+			height: 400 * sizeFactor,
+			width: 600 * sizeFactor,
+			visible: false
+		});
+
+		var waitingScreenBackground = new Kinetic.Rect({
+			x: 0, 
+			y: 0,
+			height: 400 * sizeFactor,
+			width: 600 * sizeFactor,
+			fill: 'black' //todo: choose color
+		});
+
+		var waitingScreenText = new Kinetic.Text({
+			x: 100 * sizeFactor,
+			y: 100 * sizeFactor,
+			height: 300 * sizeFactor,
+			width: 400 * sizeFactor,
+			align: 'center',
+			fontFamily: 'Monaco',
+			fontSize: 64 * sizeFactor,
+			text: 'WAITING FOR OTHER PLAYER',
+			fill: 'red',
+			fontStyle: 'bold',
+			shadowOpacity: .4,
+			shadowOffset: {
+				x: 3 * sizeFactor,
+				y: 3 * sizeFactor
+			}
+		})
 
 		levelComplete.add(levelCompleteBackground)
 			.add(continueText)
 			.add(levelCompleteContinue)
 			.add(levelCompleteText);
-		infoLayer.add(levelComplete);
+		waitingScreen.add(waitingScreenBackground)
+			.add(waitingScreenText);
+		infoLayer.add(levelComplete).add(waitingScreen);
 
 
 
@@ -1408,11 +1446,11 @@ $(document).ready(function(){
 			this.direction = 'up';
 			this.maxHp = playerData.health;
 			this.healthBarBorder = new Kinetic.Rect({
-				x: (width - 202) * sizeFactor,
-				y: (height - 62) * sizeFactor,
-				width: 154 * sizeFactor,
-				height: 24 * sizeFactor,
-				strokeWidth: 4 * sizeFactor,
+				x: (width - 200) * sizeFactor - 2,
+				y: (height - 60) * sizeFactor - 2,
+				width: 150 * sizeFactor + 4,
+				height: 20 * sizeFactor + 4,
+				strokeWidth: 4,
 				stroke: 'black'
 			});
 			this.healthBar = new Kinetic.Rect({
@@ -1422,8 +1460,8 @@ $(document).ready(function(){
 				height: 20 * sizeFactor,
 				fill: 'red'
 			});
-			if(playerNum == 2){
-				this.healthBarBorder.y((height - 30) * sizeFactor);
+			if(playerNum == 1){
+				this.healthBarBorder.y((height - 30) * sizeFactor - 2);
 				this.healthBar.y((height - 30) * sizeFactor).fill('blue');
 			}
 		};
@@ -1753,6 +1791,7 @@ $(document).ready(function(){
 			if(data.message == 'updateState'){
 				if(levelComplete.isVisible()){
 					levelComplete.hide();
+					waitingScreen.hide();
 				}
 				var gameState = data.gameState,
 				enemyData = gameState.enemyData,
