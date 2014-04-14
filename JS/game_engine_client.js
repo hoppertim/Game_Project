@@ -287,7 +287,7 @@ $(document).ready(function(){
 			twoPlayer.y(396 * sizeFactor);
 			twoPlayer.width(150 * sizeFactor);
 			twoPlayer.height(48 * sizeFactor);
-chDraw();
+			foreground.batchDraw();
 		});
 
 		howToPlay.on('mouseleave', function(){
@@ -433,157 +433,156 @@ chDraw();
 
 	function displayHowToPlay(){
 		$('title').text('How to Play');
-    $('#play_area').css({
-      'backgroundImage': 'url("../IMG/background_neonbest.jpg")'
-    });
+	    $('#play_area').css({
+	      'backgroundImage': 'url("../IMG/background_neonbit.jpg")'
+	    });
 
-    var sizeFactor = window.innerWidth / 1366;
+	    var sizeFactor = window.innerWidth / 1366;
 
-    //creates the stage to hold the how to play screen
-    var stage = new Kinetic.Stage({
-      container: 'play_area',
-      width: 1000 * sizeFactor,
-      height: 600 * sizeFactor
-    });
+	    //creates the stage to hold the how to play screen
+	    var stage = new Kinetic.Stage({
+	      container: 'play_area',
+	      width: 1000 * sizeFactor,
+	      height: 600 * sizeFactor
+	    });
 
-    var foreground = new Kinetic.Layer();
+	    var foreground = new Kinetic.Layer();
 
-    var textBackground = new Kinetic.Group({
-      x: 250 * sizeFactor,
-      y: 150 * sizeFactor,
-      width: 600 * sizeFactor,
-      height: 408 * sizeFactor
+	    var textBackground = new Kinetic.Group({
+	      x: 250 * sizeFactor,
+	      y: 150 * sizeFactor,
+	      width: 600 * sizeFactor,
+	      height: 408 * sizeFactor
+	    });
 
-    });
+	    var textButtons = new Kinetic.Group({
+	      x: 120 * sizeFactor,
+	      y: 150 * sizeFactor,
+	      width: 200 * sizeFactor,
+	      height: 408 * sizeFactor
+	    });
 
-    var textButtons = new Kinetic.Group({
-      x: 120 * sizeFactor,
-      y: 150 * sizeFactor,
-      width: 200 * sizeFactor,
-      height: 408 * sizeFactor
-    });
+	    var title = new Kinetic.Text({
+	      x: 300 * sizeFactor,
+	      y: 60 * sizeFactor,
+	      text: 'How to Play',
+	      width: 400 * sizeFactor,
+	      align: 'center',
+	      fill: 'red',
+	      fontSize: 64 * sizeFactor,
+	      shadowOffset: {
+	        x: 3 * sizeFactor,
+	        y: 3 * sizeFactor
+	      },
+	      shadowOpacity: .4,
+	      fontFamily: 'Calibri',
+	      fontStyle: 'bold'
+	    });
 
-    var title = new Kinetic.Text({
-      x: 300 * sizeFactor,
-      y: 60 * sizeFactor,
-      text: 'How to Play',
-      width: 400 * sizeFactor,
-      align: 'center',
-      fill: 'red',
-      fontSize: 64 * sizeFactor,
-      shadowOffset: {
-        x: 3 * sizeFactor,
-        y: 3 * sizeFactor
-      },
-      shadowOpacity: .4,
-      fontFamily: 'Calibri',
-      fontStyle: 'bold'
-    });
+	    var textBorder = new Kinetic.Rect({
+	      width: 600 * sizeFactor,
+	      height: 408 * sizeFactor,
+	      stroke: 'white',
+	      strokeWidth: 3 * sizeFactor,
+	      cornerRadius: 10
+	    });
 
-    var textBorder = new Kinetic.Rect({
-      width: 600 * sizeFactor,
-      height: 408 * sizeFactor,
-      stroke: 'white',
-      strokeWidth: 3 * sizeFactor,
-      cornerRadius: 10
-    });
+	    var textFill = new Kinetic.Rect({
+	      width: 600 * sizeFactor,
+	      height: 408 * sizeFactor,
+	      fill: '#DBD2CB',
+	      opacity: .3 * sizeFactor,
+	      cornerRadius: 10
+	    });
 
-    var textFill = new Kinetic.Rect({
-      width: 600 * sizeFactor,
-      height: 408 * sizeFactor,
-      fill: '#DBD2CB',
-      opacity: .3 * sizeFactor,
-      cornerRadius: 10
-    });
+	    var textInfo = new Kinetic.Text({
+	      x: 10 * sizeFactor,
+	      y: 10 * sizeFactor,
+	      width: 580 * sizeFactor,
+	      height: 388 * sizeFactor,
+	      text: '',
+	      fill: 'white',
+	      fontSize: 22 * sizeFactor,
+	      fontFamily: 'Calibri'
+	    });
 
-    var textInfo = new Kinetic.Text({
-      x: 10 * sizeFactor,
-      y: 10 * sizeFactor,
-      width: 580 * sizeFactor,
-      height: 388 * sizeFactor,
-      text: '',
-      fill: 'white',
-      fontSize: 22 * sizeFactor,
-      fontFamily: 'Calibri'
-    });
+	    var objectiveBorder = new Kinetic.Rect({
+	      y: 4 * sizeFactor,
+	      width: 110 * sizeFactor,
+	      height: 60 * sizeFactor,
+	      stroke: 'white',
+	      strokeWidth: 3 * sizeFactor,
+	      cornerRadius: 2 * sizeFactor,
+	      opacity: .6,
+	      shadowOpacity: .4,
+	      shadowOffset: {
+	        x: 8 * sizeFactor,
+	        y: 8 * sizeFactor
+	      }
+	    });
 
-    var objectiveBorder = new Kinetic.Rect({
-      y: 4 * sizeFactor,
-      width: 110 * sizeFactor,
-      height: 60 * sizeFactor,
-      stroke: 'white',
-      strokeWidth: 3 * sizeFactor,
-      cornerRadius: 2 * sizeFactor,
-      opacity: .6,
-      shadowOpacity: .4,
-      shadowOffset: {
-        x: 8 * sizeFactor,
-        y: 8 * sizeFactor
-      }
-    });
+	    var objectiveText = new Kinetic.Text({
+	      x: 3 * sizeFactor,
+	      y: 24 * sizeFactor,
+	      width: 104 * sizeFactor,
+	      text: 'Objective',
+	      fill: 'white',
+	      fontSize: 20 * sizeFactor,
+	      fontFamily: 'Calibri',
+	      align: 'center',
+	      opacity: .6,
+	      shadowOpacity: .4,
+	      shadowOffset: {
+	        x: 8 * sizeFactor,
+	        y: 8 * sizeFactor
+	      }
+	    });
 
-    var objectiveText = new Kinetic.Text({
-      x: 3 * sizeFactor,
-      y: 24 * sizeFactor,
-      width: 104 * sizeFactor,
-      text: 'Objective',
-      fill: 'white',
-      fontSize: 20 * sizeFactor,
-      fontFamily: 'Calibri',
-      align: 'center',
-      opacity: .6,
-      shadowOpacity: .4,
-      shadowOffset: {
-        x: 8 * sizeFactor,
-        y: 8 * sizeFactor
-      }
-    });
+	    objectiveBorder.on('mouseenter', function(){
+	      objectiveBorder.opacity(1);
+	      objectiveBorder.shadowOpacity(1);
+	      objectiveText.opacity(1);
+	      objectiveText.shadowOpacity(1);
+	      foreground.batchDraw();
+	    });
 
-    objectiveBorder.on('mouseenter', function(){
-      objectiveBorder.opacity(1);
-      objectiveBorder.shadowOpacity(1);
-      objectiveText.opacity(1);
-      objectiveText.shadowOpacity(1);
-      foreground.batchDraw();
-    });
+	    objectiveBorder.on('mouseleave', function(){
+	      if(objectiveBorder.shadowOffsetX() != 4 * sizeFactor){
+	        objectiveBorder.opacity(.6);
+	        objectiveBorder.shadowOpacity(.4);
+	        objectiveText.opacity(.6);
+	        objectiveText.shadowOpacity(.4);
+	        foreground.batchDraw();  
+	      }
+	    });
 
-    objectiveBorder.on('mouseleave', function(){
-      if(objectiveBorder.shadowOffsetX() != 4 * sizeFactor){
-        objectiveBorder.opacity(.6);
-        objectiveBorder.shadowOpacity(.4);
-        objectiveText.opacity(.6);
-        objectiveText.shadowOpacity(.4);
-        foreground.batchDraw();  
-      }
-    });
+	    objectiveBorder.on('mousedown', function(){
+	      if(objectiveBorder.shadowOffsetX() != 4 * sizeFactor){
+	        resetButtons();
+	        objectiveBorder.opacity(1);
+	        objectiveBorder.shadowOpacity(1);
+	        objectiveText.opacity(1);
+	        objectiveText.shadowOpacity(1);
+	        objectiveBorder.shadowOffset({
+	          x: 4 * sizeFactor,
+	          y: 2 * sizeFactor
+	        });
+	        objectiveBorder.x(4 * sizeFactor);
+	        objectiveBorder.y(6 * sizeFactor);
+	        objectiveBorder.width(107 * sizeFactor);
+	        objectiveBorder.height(57 * sizeFactor);
 
-    objectiveBorder.on('mousedown', function(){
-      if(objectiveBorder.shadowOffsetX() != 4 * sizeFactor){
-        resetButtons();
-        objectiveBorder.opacity(1);
-        objectiveBorder.shadowOpacity(1);
-        objectiveText.opacity(1);
-        objectiveText.shadowOpacity(1);
-        objectiveBorder.shadowOffset({
-          x: 4 * sizeFactor,
-          y: 2 * sizeFactor
-        });
-        objectiveBorder.x(4 * sizeFactor);
-        objectiveBorder.y(6 * sizeFactor);
-        objectiveBorder.width(107 * sizeFactor);
-        objectiveBorder.height(57 * sizeFactor);
-
-        objectiveText.shadowOffset({
-          x: 4 * sizeFactor,
-          y: 2 * sizeFactor
-        });
-        objectiveText.x(7 * sizeFactor);
-        objectiveText.y(26 * sizeFactor);
-        objectiveText.width(101 * sizeFactor);
-        textInfo.text('Info about the objective of the game');
-        foreground.batchDraw();
-      }
-    });
+	        objectiveText.shadowOffset({
+	          x: 4 * sizeFactor,
+	          y: 2 * sizeFactor
+	        });
+	        objectiveText.x(7 * sizeFactor);
+	        objectiveText.y(26 * sizeFactor);
+	        objectiveText.width(101 * sizeFactor);
+	        textInfo.text('Info about the objective of the game');
+	        foreground.batchDraw();
+	      }
+	    });
 
 		var controlsBorder = new Kinetic.Rect({
 			y: 72 * sizeFactor,
