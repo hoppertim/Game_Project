@@ -231,13 +231,13 @@ $(document).ready(function(){
 
 		var waitingScreenText = new Kinetic.Text({
 			x: 100 * sizeFactor,
-			y: 50 * sizeFactor,
+			y: 100 * sizeFactor,
 			height: 300 * sizeFactor,
 			width: 400 * sizeFactor,
 			align: 'center',
 			fontFamily: 'Monaco',
 			fontSize: 64 * sizeFactor,
-			text: 'WAITING FOR/nOTHER PLAYER',
+			text: 'WAITING FOR OTHER PLAYER',
 			fill: 'red',
 			fontStyle: 'bold',
 			shadowOpacity: .4,
@@ -1030,6 +1030,7 @@ $(document).ready(function(){
 			returnText.x(3 * sizeFactor);
 			returnText.y(364) * sizeFactor;
 			returnText.width(104 * sizeFactor);
+			foreground.batchDraw();
 		});
 
 		returnBorder.on('click', function(){
@@ -1160,10 +1161,10 @@ $(document).ready(function(){
 			.add(controlsBorder)
 			.add(gunsText)
 			.add(gunsBorder)
-			.add(armorText)
-			.add(armorBorder)
-			.add(turretsText)
-			.add(turretsBorder)
+			//.add(armorText)
+			//.add(armorBorder)
+			//.add(turretsText)
+			//.add(turretsBorder)
 			.add(returnText)
 			.add(returnBorder);
 		textBackground.add(textFill)
@@ -1272,7 +1273,7 @@ $(document).ready(function(){
 			fill: 'black'
 		});
 		var levelCompleteContinue = new Kinetic.Rect({
-			x: 75 * sizeFactor,
+			x: 225 * sizeFactor,
 			y: 250 * sizeFactor,
 			width: 150 * sizeFactor,
 			height: 75 * sizeFactor,
@@ -1287,22 +1288,7 @@ $(document).ready(function(){
 				y: 8 * sizeFactor
 			}
 		});
-		var levelCompleteQuit = new Kinetic.Rect({
-			x: 375 * sizeFactor,
-			y: 250 * sizeFactor,
-			width: 150 * sizeFactor,
-			height: 75 * sizeFactor,
-			stroke: 'white',
-			strokeWidth: 4 * sizeFactor,
-			cornerRadius: 2,
-			opacity: .6,
-			shadowColor: '#000000',
-			shadowOpacity: .4,
-			shadowOffset: {
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			}
-		});
+		
 		var levelCompleteText = new Kinetic.Text({
 			x: 100 * sizeFactor,
 			y: 50 * sizeFactor,
@@ -1319,7 +1305,7 @@ $(document).ready(function(){
 			}
 		});
 		var continueText = new Kinetic.Text({
-			x: 75 * sizeFactor,
+			x: 225 * sizeFactor,
 			y: 250 * sizeFactor,
 			width: 150 * sizeFactor,
 			align: 'center',
@@ -1342,25 +1328,8 @@ $(document).ready(function(){
 			ws.send(data);
 		});
 
-		var quitText = new Kinetic.Text({
-			x: 375 * sizeFactor,
-			y: 250 * sizeFactor,
-			width: 150 * sizeFactor,
-			align: 'center',
-			fontFamily: 'Calibri',
-			fontSize: 24 * sizeFactor,
-			text: 'Quit',
-			fill: 'white',
-			shadowColor: '#000000',
-			shadowOffset: {
-				x: 4 * sizeFactor,
-				y: 4 * sizeFactor
-			}
-		});
 		levelComplete.add(levelCompleteBackground)
 			.add(continueText)
-			.add(quitText)
-			.add(levelCompleteQuit)
 			.add(levelCompleteContinue)
 			.add(levelCompleteText);
 		infoLayer.add(levelComplete);
@@ -1439,11 +1408,11 @@ $(document).ready(function(){
 			this.direction = 'up';
 			this.maxHp = playerData.health;
 			this.healthBarBorder = new Kinetic.Rect({
-				x: (width - 200) * sizeFactor - 2,
-				y: (height - 60) * sizeFactor - 2,
+				x: (width - 202) * sizeFactor,
+				y: (height - 62) * sizeFactor,
 				width: 154 * sizeFactor,
 				height: 24 * sizeFactor,
-				strokeWidth: 4,
+				strokeWidth: 4 * sizeFactor,
 				stroke: 'black'
 			});
 			this.healthBar = new Kinetic.Rect({
