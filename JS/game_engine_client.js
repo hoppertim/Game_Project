@@ -149,7 +149,7 @@ $(document).ready(function(){
 			align: 'center',
 			fontFamily: 'Calibri',
 			fontSize: 16 * sizeFactor,
-			text: 'Play',
+			text: 'Play Game',
 			fill: 'white',
 			opacity: .6,
 			shadowColor: '#000000',
@@ -287,8 +287,25 @@ $(document).ready(function(){
 			twoPlayer.y(396 * sizeFactor);
 			twoPlayer.width(150 * sizeFactor);
 			twoPlayer.height(48 * sizeFactor);
+
+			twoPlayerText.shadowOffset({
+				x: 8 * sizeFactor,
+				y: 8 * sizeFactor
+			});
+			twoPlayerText.x(340 * sizeFactor);
+			twoPlayerText.y(411 * sizeFactor);
+			twoPlayerText.width(150 * sizeFactor);
+			twoPlayerText.height(44 * sizeFactor);
 			foreground.batchDraw();
 		});
+
+		howToPlay.on('mouseenter', function(){
+	      howToPlay.opacity(1);
+	      howToPlay.shadowOpacity(1);
+	      howToPlayText.opacity(1);
+	      howToPlayText.shadowOpacity(1);
+	      foreground.batchDraw();
+	    });
 
 		howToPlay.on('mouseleave', function(){
 			howToPlay.opacity(.6);
@@ -316,23 +333,31 @@ $(document).ready(function(){
 			howToPlayText.y(411 * sizeFactor);
 			howToPlayText.width(142 * sizeFactor);
 			howToPlayText.height(44 * sizeFactor);
-			twoPlayer.x(344 * sizeFactor);
-			twoPlayer.y(398 * sizeFactor);
-			twoPlayer.width(147 * sizeFactor);
-			twoPlayer.height(45 * sizeFactor);
-
-			twoPlayerText.shadowOffset({
-				x: 4 * sizeFactor,
-				y: 2 * sizeFactor
-			});
-			twoPlayerText.x(344 * sizeFactor);
-			twoPlayerText.y(413 * sizeFactor);
-			twoPlayerText.width(147 * sizeFactor);
-			twoPlayerText.height(41 * sizeFactor);
 			foreground.batchDraw();
 		});
 
-			twoPlayer.on('mouseup', function(){
+		twoPlayer.on('mousedown', function(){
+	      twoPlayer.shadowOffset({
+	        x: 4 * sizeFactor,
+	        y: 2 * sizeFactor
+	      });
+	      twoPlayer.x(344 * sizeFactor);
+	      twoPlayer.y(398 * sizeFactor);
+	      twoPlayer.width(147 * sizeFactor);
+	      twoPlayer.height(45 * sizeFactor);
+
+	      twoPlayerText.shadowOffset({
+	        x: 4 * sizeFactor,
+	        y: 2 * sizeFactor
+	      });
+	      twoPlayerText.x(344 * sizeFactor);
+	      twoPlayerText.y(413 * sizeFactor);
+	      twoPlayerText.width(147 * sizeFactor);
+	      twoPlayerText.height(41 * sizeFactor);
+	      foreground.batchDraw();
+	    });
+
+		twoPlayer.on('mouseup', function(){
 			twoPlayer.shadowOffset({
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
@@ -374,7 +399,7 @@ $(document).ready(function(){
 			foreground.batchDraw();
 		});
 
-			howToPlay.on('mouseup', function(){
+		howToPlay.on('mouseup', function(){
 			howToPlay.shadowOffset({
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
@@ -388,6 +413,10 @@ $(document).ready(function(){
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
+			howToPlayText.x(514 * sizeFactor);
+			howToPlayText.y(411 * sizeFactor);
+			howToPlayText.width(142 * sizeFactor);
+			howToPlayText.height(44 * sizeFactor);
 			foreground.batchDraw();
 		});
 
@@ -434,7 +463,7 @@ $(document).ready(function(){
 	function displayHowToPlay(){
 		$('title').text('How to Play');
 	    $('#play_area').css({
-	      'backgroundImage': 'url("../IMG/background_neonbit.jpg")'
+	      'backgroundImage': 'url("static/IMG/background_neonbit.png")'
 	    });
 
 	    var sizeFactor = window.innerWidth / 1366;
@@ -1793,6 +1822,7 @@ $(document).ready(function(){
 					audio[0].play();
 					$('#play_area').off('mousedown mouseup mousemove');
 					$(document).off('keydown keyup');
+					$('#play_area').fadeIn();
 					displayTitle();
 				}, 3000);
 			}else if(data.message == 'waveComplete'){
