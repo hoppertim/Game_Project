@@ -123,7 +123,7 @@ $(document).ready(function(){
 		var foreground = new Kinetic.Layer();
 
 		//single player button
-		var singlePlayer = new Kinetic.Rect({
+		var twoPlayer = new Kinetic.Rect({
 			x: 340 * sizeFactor,
 			y: 396 * sizeFactor,
 			width: 150 * sizeFactor,
@@ -141,7 +141,7 @@ $(document).ready(function(){
 		});
 
 		//single player text
-		var singlePlayerText = new Kinetic.Text({
+		var twoPlayerText = new Kinetic.Text({
 			x: 344 * sizeFactor,
 			y: 411 * sizeFactor,
 			width: 142 * sizeFactor,
@@ -161,7 +161,7 @@ $(document).ready(function(){
 		});
 
 		//two player button
-		var twoPlayer = new Kinetic.Rect({
+		var howToPlay = new Kinetic.Rect({
 			x: 510 * sizeFactor,
 			y: 396 * sizeFactor,
 			width: 150 * sizeFactor,
@@ -178,7 +178,7 @@ $(document).ready(function(){
 			}
 		});
 
-		var twoPlayerText = new Kinetic.Text({
+		var howToPlayText = new Kinetic.Text({
 			x: 514 * sizeFactor,
 			y: 411 * sizeFactor,
 			width: 142 * sizeFactor,
@@ -187,42 +187,6 @@ $(document).ready(function(){
 			fontFamily: 'Calibri',
 			fontSize: 16 * sizeFactor,
 			text: 'Two Player Game',
-			fill: 'white',
-			opacity: .6,
-			shadowColor: '#000000',
-			shadowOpacity: .4,
-			shadowOffset: {
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			}
-		});
-
-		var howToPlay = new Kinetic.Rect({
-			x: 450 * sizeFactor,
-			y: 456 * sizeFactor,
-			width: 100 * sizeFactor,
-			height: 42 * sizeFactor,
-			stroke: 'white',
-			strokeWidth: 4 * sizeFactor,
-			cornerRadius: 2,
-			opacity: .6,
-			shadowColor: '#000000',
-			shadowOpacity: .4,
-			shadowOffset: {
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			}
-		});
-
-		var howToPlayText = new Kinetic.Text({
-			x: 454 * sizeFactor,
-			y: 468 * sizeFactor,
-			width: 92 * sizeFactor,
-			height: 38 * sizeFactor,
-			align: 'center',
-			fontFamily: 'Calibri',
-			fontSize: 16 * sizeFactor,
-			text: 'How To Play',
 			fill: 'white',
 			opacity: .6,
 			shadowColor: '#000000',
@@ -288,9 +252,7 @@ $(document).ready(function(){
 		*/
 		waitingScreen.add(waitingScreenBackground)
 			.add(waitingScreenText);
-		foreground.add(singlePlayerText)
-			.add(singlePlayer)
-			.add(twoPlayerText)
+		foreground.add(twoPlayerText)
 			.add(twoPlayer)
 			.add(howToPlayText)
 			.add(howToPlay)
@@ -303,39 +265,6 @@ $(document).ready(function(){
 		/*
 		* add events to the buttons here
 		*/
-
-		singlePlayer.on('mouseenter', function(){
-			singlePlayer.opacity(1);
-			singlePlayer.shadowOpacity(1);
-			singlePlayerText.opacity(1);
-			singlePlayerText.shadowOpacity(1);
-			foreground.batchDraw();
-		});
-
-		singlePlayer.on('mouseleave', function(){
-			singlePlayer.opacity(.6);
-			singlePlayer.shadowOpacity(.4);
-			singlePlayerText.opacity(.6);
-			singlePlayerText.shadowOpacity(.4);
-			singlePlayer.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			singlePlayer.x(340 * sizeFactor);
-			singlePlayer.y(396 * sizeFactor);
-			singlePlayer.width(150 * sizeFactor);
-			singlePlayer.height(48 * sizeFactor);
-
-			singlePlayerText.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			singlePlayerText.x(340 * sizeFactor);
-			singlePlayerText.y(411 * sizeFactor);
-			singlePlayerText.width(150 * sizeFactor);
-			singlePlayerText.height(44 * sizeFactor);
-			foreground.batchDraw();
-		});
 
 		twoPlayer.on('mouseenter', function(){
 			twoPlayer.opacity(1);
@@ -354,32 +283,11 @@ $(document).ready(function(){
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			twoPlayer.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			twoPlayer.x(510 * sizeFactor);
+			twoPlayer.x(340 * sizeFactor);
 			twoPlayer.y(396 * sizeFactor);
 			twoPlayer.width(150 * sizeFactor);
 			twoPlayer.height(48 * sizeFactor);
-
-			twoPlayerText.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			twoPlayerText.x(514 * sizeFactor);
-			twoPlayerText.y(411 * sizeFactor);
-			twoPlayerText.width(142 * sizeFactor);
-			twoPlayerText.height(44 * sizeFactor);
-			foreground.batchDraw();
-		});
-
-		howToPlay.on('mouseenter', function(){
-			howToPlay.opacity(1);
-			howToPlay.shadowOpacity(1);
-			howToPlayText.opacity(1);
-			howToPlayText.shadowOpacity(1);
-			foreground.batchDraw();
+chDraw();
 		});
 
 		howToPlay.on('mouseleave', function(){
@@ -391,70 +299,24 @@ $(document).ready(function(){
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			howToPlay.x(450 * sizeFactor);
-			howToPlay.y(456 * sizeFactor);
-			howToPlay.width(100 * sizeFactor);
-			howToPlay.height(42 * sizeFactor);
+			howToPlay.shadowOffset({
+				x: 8 * sizeFactor,
+				y: 8 * sizeFactor
+			});
+			howToPlay.x(510 * sizeFactor);
+			howToPlay.y(396 * sizeFactor);
+			howToPlay.width(150 * sizeFactor);
+			howToPlay.height(48 * sizeFactor);
 
 			howToPlayText.shadowOffset({
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			howToPlayText.x(454 * sizeFactor);
-			howToPlayText.y(468 * sizeFactor);
-			howToPlayText.width(92 * sizeFactor);
-			howToPlayText.height(38 * sizeFactor);
-			foreground.batchDraw();
-		});
-
-			singlePlayer.on('mousedown', function(){
-			singlePlayer.shadowOffset({
-				x: 4 * sizeFactor,
-				y: 2 * sizeFactor
-			});
-			singlePlayer.x(344 * sizeFactor);
-			singlePlayer.y(398 * sizeFactor);
-			singlePlayer.width(147 * sizeFactor);
-			singlePlayer.height(45 * sizeFactor);
-
-			singlePlayerText.shadowOffset({
-				x: 4 * sizeFactor,
-				y: 2 * sizeFactor
-			});
-			singlePlayerText.x(344 * sizeFactor);
-			singlePlayerText.y(413 * sizeFactor);
-			singlePlayerText.width(147 * sizeFactor);
-			singlePlayerText.height(41 * sizeFactor);
-			foreground.batchDraw();
-		});
-
-			singlePlayer.on('mouseup', function(){
-			singlePlayer.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			singlePlayer.x(340 * sizeFactor);
-			singlePlayer.y(396 * sizeFactor);
-			singlePlayer.width(150 * sizeFactor);
-			singlePlayer.height(48 * sizeFactor);
-
-			singlePlayerText.shadowOffset({
-				x: 8 * sizeFactor,
-				y: 8 * sizeFactor
-			});
-			singlePlayerText.x(340 * sizeFactor);
-			singlePlayerText.y(411 * sizeFactor);
-			singlePlayerText.width(150 * sizeFactor);
-			singlePlayerText.height(44 * sizeFactor);
-			foreground.batchDraw();
-		});
-
-		twoPlayer.on('mousedown', function(){
-			twoPlayer.shadowOffset({
-				x: 4 * sizeFactor,
-				y: 2 * sizeFactor
-			});
-			twoPlayer.x(514 * sizeFactor);
+			howToPlayText.x(514 * sizeFactor);
+			howToPlayText.y(411 * sizeFactor);
+			howToPlayText.width(142 * sizeFactor);
+			howToPlayText.height(44 * sizeFactor);
+			twoPlayer.x(344 * sizeFactor);
 			twoPlayer.y(398 * sizeFactor);
 			twoPlayer.width(147 * sizeFactor);
 			twoPlayer.height(45 * sizeFactor);
@@ -463,9 +325,9 @@ $(document).ready(function(){
 				x: 4 * sizeFactor,
 				y: 2 * sizeFactor
 			});
-			twoPlayerText.x(518 * sizeFactor);
+			twoPlayerText.x(344 * sizeFactor);
 			twoPlayerText.y(413 * sizeFactor);
-			twoPlayerText.width(139 * sizeFactor);
+			twoPlayerText.width(147 * sizeFactor);
 			twoPlayerText.height(41 * sizeFactor);
 			foreground.batchDraw();
 		});
@@ -475,7 +337,7 @@ $(document).ready(function(){
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			twoPlayer.x(510 * sizeFactor);
+			twoPlayer.x(340 * sizeFactor);
 			twoPlayer.y(396 * sizeFactor);
 			twoPlayer.width(150 * sizeFactor);
 			twoPlayer.height(48 * sizeFactor);
@@ -484,53 +346,48 @@ $(document).ready(function(){
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			twoPlayerText.x(514 * sizeFactor);
+			twoPlayerText.x(340 * sizeFactor);
 			twoPlayerText.y(411 * sizeFactor);
-			twoPlayerText.width(142 * sizeFactor);
+			twoPlayerText.width(150 * sizeFactor);
 			twoPlayerText.height(44 * sizeFactor);
 			foreground.batchDraw();
 		});
-
 
 		howToPlay.on('mousedown', function(){
 			howToPlay.shadowOffset({
 				x: 4 * sizeFactor,
 				y: 2 * sizeFactor
 			});
-			howToPlay.x(454 * sizeFactor);
-			howToPlay.y(458 * sizeFactor);
-			howToPlay.width(97 * sizeFactor);
-			howToPlay.height(39 * sizeFactor);
+			howToPlay.x(514 * sizeFactor);
+			howToPlay.y(398 * sizeFactor);
+			howToPlay.width(147 * sizeFactor);
+			howToPlay.height(45 * sizeFactor);
 
 			howToPlayText.shadowOffset({
 				x: 4 * sizeFactor,
 				y: 2 * sizeFactor
 			});
-			howToPlayText.x(458 * sizeFactor);
-			howToPlayText.y(470 * sizeFactor);
-			howToPlayText.width(89 * sizeFactor);
-			howToPlayText.height(35 * sizeFactor);
+			howToPlayText.x(518 * sizeFactor);
+			howToPlayText.y(413 * sizeFactor);
+			howToPlayText.width(139 * sizeFactor);
+			howToPlayText.height(41 * sizeFactor);
 			foreground.batchDraw();
 		});
 
-		howToPlay.on('mouseup', function(){
+			howToPlay.on('mouseup', function(){
 			howToPlay.shadowOffset({
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			howToPlay.x(450 * sizeFactor);
-			howToPlay.y(456 * sizeFactor);
-			howToPlay.width(100 * sizeFactor);
-			howToPlay.height(42 * sizeFactor);
+			howToPlay.x(510 * sizeFactor);
+			howToPlay.y(396 * sizeFactor);
+			howToPlay.width(150 * sizeFactor);
+			howToPlay.height(48 * sizeFactor);
 
 			howToPlayText.shadowOffset({
 				x: 8 * sizeFactor,
 				y: 8 * sizeFactor
 			});
-			howToPlayText.x(454 * sizeFactor);
-			howToPlayText.y(468 * sizeFactor);
-			howToPlayText.width(92 * sizeFactor);
-			howToPlayText.height(38 * sizeFactor);
 			foreground.batchDraw();
 		});
 
@@ -556,17 +413,6 @@ $(document).ready(function(){
 				}
 			}
 		};
-
-		singlePlayer.on('click', function(){
-			var data = JSON.stringify({
-				'clientID': clientId,
-				'message': 'singlePlayerGame'
-			});
-			setTimeout(function(){
-				ws.send(data);
-			}, 75);
-			console.log(data);
-		});
 
 		twoPlayer.on('click', function(){
 			waitingScreen.show();
@@ -602,24 +448,7 @@ $(document).ready(function(){
 
 		var foreground = new Kinetic.Layer();
 
-		var textBackground = new Kinetic.Group({
-			x: 250 * sizeFactor,
-			y: 150 * sizeFactor,
-			width: 600 * sizeFactor,
-			height: 408 * sizeFactor
-		});
-
-		var textButtons = new Kinetic.Group({
-			x: 120 * sizeFactor,
-			y: 150 * sizeFactor,
-			width: 200 * sizeFactor,
-			height: 408 * sizeFactor
-		});
-
-		var title = new Kinetic.Text({
-			x: 300 * sizeFactor,
-			y: 60 * sizeFactor,
-			text: 'How to Play',
+		var textB 'How to Play',
 			width: 400 * sizeFactor,
 			align: 'center',
 			fill: 'red',
@@ -1945,6 +1774,8 @@ $(document).ready(function(){
 					audio[4].pause();
 					audio[4].currentTime = 0;
 					audio[0].play();
+					$('#play_area').off('mousedown mouseup mousemove');
+					$(document).off('keydown keyup');
 					displayTitle();
 				}, 3000);
 			}else if(data.message == 'waveComplete'){
