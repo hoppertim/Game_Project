@@ -6,8 +6,8 @@ import tornado.websocket
 import json
 import os
 
-import enemy_s
 import game_s
+import enemy_s
 
 KEY_W = 87
 KEY_A = 65
@@ -18,13 +18,13 @@ KEY_SPACE = 32
 
 from tornado.options import define, options, parse_command_line
 
-define("port", default=11000, help="run on the given port", type=int)
+define("port", default=13120, help="run on the given port", type=int)
 
 
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(request):
-        request.render('index.html')
+        request.render(r'../static/HTML/index.html')
 
 clients = []
 clients_started = []
@@ -37,17 +37,21 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         self.client_id = 0
         self.wave_wait = 0
         self.update_loop = tornado.ioloop.PeriodicCallback(self.update_clients, 40)
-        self.initial_state_1p = dict(
-            message='singlePlayerGame',
-            gameState=dict(
-                player=dict(x=game.player1.position['x'], y=game.player1.position['y'], health=100)
-            )
-        )
         self.initial_state_2p = dict(
             message='twoPlayerGame',
             gameState=dict(
-                player=dict(x=game.player1.position['x'], y=game.player1.position['y'], health=100),
-                otherPlayer=dict(x=game.player2.position['x'], y=game.player2.position['y'], health=100)
+                player=dict(
+                    x=game.player1.position['x'],
+                    y=game.player1.position['y'],
+                    health=100,
+                    pistol=True
+                ),
+                otherPlayer=dict(
+                    x=game.player2.position['x'],
+                    y=game.player2.position['y'],
+                    health=100,
+                    pistol=True
+                )
             )
         )
         self.update_state = dict(
@@ -55,8 +59,20 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
             gameState=dict(
                 enemyData=[],
                 bulletData=[],
-                playerData=dict(x=0, y=0, imgNum=0, health=100),
-                otherPlayerData=dict(x=0, y=0, imgNum=0, health=100)
+                playerData=dict(
+                    x=0,
+                    y=0,
+                    imgNum=0,
+                    health=100,
+                    pistol=True
+                ),
+                otherPlayerData=dict(
+                    x=0,
+                    y=0,
+                    imgNum=0,
+                    health=100,
+                    pistol=True
+                )
             )
         )
 
@@ -84,16 +100,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         in_msg = json.loads(message)
 
-        if in_msg['message'] == 'singlePlayerGame':
-            print "In spg"
-            out_msg = json.dumps(self.initial_state_1p)
-            self.write_message(out_msg)
-            print "Game should start!"
-            game.__init__()
-            game.populate_enemies()
-            game.spawn_enemies()
-            self.update_loop.start()
-        elif in_msg['message'] == 'twoPlayerGame':
+        if in_msg['message'] == 'twoPlayerGame':
             if self not in clients_started:
                 clients_started.append(self)
             if len(clients_started) == 2:
@@ -114,6 +121,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                 self.update_loop.start()
                 clients_started.__init__()
         elif in_msg['message'] == 'mousedown':
+            print "shooting!!!!"
             if in_msg['clientID'] == 1:
                 game.player1.aim['x'] = in_msg['x']
                 game.player1.aim['y'] = in_msg['y']
@@ -212,6 +220,7 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         self.update_loop.stop()
 
     def update_clients(self):
+        print "len clients " + str(len(clients))
         enemy_obj = dict(
             x=0,
             y=0,
@@ -259,21 +268,25 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
         clients[0].update_state['gameState']['playerData']['y'] = game.player2.position['y']
         clients[0].update_state['gameState']['playerData']['imgNum'] = game.player2.image_num
         clients[0].update_state['gameState']['playerData']['health'] = game.player2.health
+        clients[0].update_state['gameState']['playerData']['pistol'] = game.player2.pistol_equipped
 
         clients[0].update_state['gameState']['otherPlayerData']['x'] = game.player1.position['x']
         clients[0].update_state['gameState']['otherPlayerData']['y'] = game.player1.position['y']
         clients[0].update_state['gameState']['otherPlayerData']['imgNum'] = game.player1.image_num
         clients[0].update_state['gameState']['otherPlayerData']['health'] = game.player1.health
+        clients[0].update_state['gameState']['otherPlayerData']['pistol'] = game.player1.pistol_equipped
 
         clients[1].update_state['gameState']['playerData']['x'] = game.player1.position['x']
         clients[1].update_state['gameState']['playerData']['y'] = game.player1.position['y']
         clients[1].update_state['gameState']['playerData']['imgNum'] = game.player1.image_num
         clients[1].update_state['gameState']['playerData']['health'] = game.player1.health
+        clients[1].update_state['gameState']['playerData']['pistol'] = game.player1.pistol_equipped
 
         clients[1].update_state['gameState']['otherPlayerData']['x'] = game.player2.position['x']
         clients[1].update_state['gameState']['otherPlayerData']['y'] = game.player2.position['y']
         clients[1].update_state['gameState']['otherPlayerData']['imgNum'] = game.player2.image_num
         clients[1].update_state['gameState']['otherPlayerData']['health'] = game.player2.health
+        clients[1].update_state['gameState']['otherPlayerData']['pistol'] = game.player2.pistol_equipped
 
         if game.game_lost:
             lost = json.dumps(self.game_lost)
@@ -301,7 +314,6 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
                 game.level_number = next_level
                 game.populate_enemies()
                 game.spawn_enemies()
-                #self.update_loop.start()
             else:
                 for client in clients:
                     ud_st = json.dumps(client.update_state)
@@ -315,20 +327,20 @@ class WebSocketGameHandler(tornado.websocket.WebSocketHandler):
 
 
 settings = {
-    'static_path': os.path.join(os.path.dirname(__file__), 'static')
+    'static_path': os.path.join(os.path.dirname(__file__), '../static')
 }
 
 handlers = [
     (r'/game', WebSocketGameHandler),
     (r'/', IndexHandler),
-    (r'/static/JS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/CSS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/player/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/roller/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/SPRITES/GRIDBUG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/IMG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
-    (r'/static/AUDIO/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']})
+    (r'../static/JS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/CSS/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/SPRITES/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/SPRITES/player/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/SPRITES/roller/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/SPRITES/GRIDBUG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/IMG/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']}),
+    (r'../static/AUDIO/(.*)', tornado.web.StaticFileHandler, {'path': settings['static_path']})
 ]
 
 app = tornado.web.Application(handlers, **settings)

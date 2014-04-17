@@ -65,8 +65,8 @@ class GridBug(Enemy):
         super(GridBug, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
-        self.health = 10 * hp_multiplier
-        self.speed = 0.7 + random.random() * 0.5
+        self.health = 40 * hp_multiplier
+        self.speed = 1.5 + random.random() * 0.5
         self.distance_interval = 10
         self.damage_interval = 20
         self.image_interval = 20
@@ -112,7 +112,7 @@ class Roller(Enemy):
         super(Roller, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
-        self.health = 6 * hp_multiplier
+        self.health = 24 * hp_multiplier
         self.speed = 1.7 + random.random() * 0.6
         self.distance_interval = 15
         self.damage_interval = 15
@@ -183,8 +183,8 @@ class Heavy(Enemy):
         super(Heavy, self).__init__()
         self.position['x'] = x
         self.position['y'] = y
-        self.health = 40 * hp_multiplier
-        self.speed = 0.2 + random.random() * 0.5
+        self.health = 120 * hp_multiplier
+        self.speed = 1.2 + random.random() * 0.5
         self.distance_interval = None  # TODO to be defined
         self.damage_interval = 25
         self.image_interval = 25

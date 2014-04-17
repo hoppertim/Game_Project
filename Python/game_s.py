@@ -173,6 +173,9 @@ class Game(object):
             if self.check_collision(enemy, self.player2):
                 print "Player 2 Hit! Health now at " + str(self.player2.health)
 
+        self.player1.update_image()
+        self.player2.update_image()
+
         if self.player1.hit:
             self.player1.hit = False
         if self.player2.hit:

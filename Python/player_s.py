@@ -1,6 +1,7 @@
 __author__ = 'jtgoen'
 
 import math
+import random
 
 import bullet_s
 
@@ -29,19 +30,19 @@ class Player(object):
         self.pistol = {
             'fire_rate': -1,
             'speed': 10,
-            'damage': 1,
+            'damage': 4,
             'spread': 1,
             'ammo': -1,
             'rapid_fire': False
         }
 
-        self.gun = {
-            'fire_rate': 10,
-            'speed': 15,
-            'damage': 2,
-            'spread': 1,
-            'ammo': 200,
-            'rapid_fire': True
+        self.shotgun = {
+            'fire_rate': -1,
+            'speed': 5,
+            'damage': 1,
+            'spread': 4,
+            'ammo': -1,
+            'rapid_fire': False
         }
 
     def update_movement(self):
@@ -115,18 +116,31 @@ class Player(object):
 
         if self.pistol_equipped is True:
             equipped_gun = self.pistol
+
+            bullet = bullet_s.Bullet(
+                player_x,
+                player_y,
+                dx * equipped_gun['speed'],
+                dy * equipped_gun['speed'],
+                equipped_gun['damage']
+            )
+
+            game.bullets.append(bullet)
         else:
-            equipped_gun = self.gun
+            equipped_gun = self.shotgun
 
-        bullet = bullet_s.Bullet(
-            player_x,
-            player_y,
-            dx * equipped_gun['speed'],
-            dy * equipped_gun['speed'],
-            equipped_gun['damage']
-        )
+            for i in range(1, equipped_gun['spread']):
+                bullet = bullet_s.Bullet(
+                    player_x,
+                    player_y,
+                    (dx * (1 - random.random() * .2) + dy * (-.2 + random.random() * .4)) * equipped_gun['speed'],
+                    (dy * (1 - random.random() * .2) + dx * (-.2 + random.random() * .4)) * equipped_gun['speed'],
+                    equipped_gun['damage']
+                )
 
-        game.bullets.append(bullet)
+                game.bullets.append(bullet)
+
+        print "BULLET MADE"
 
     def toggle_weapon(self):
         """Switches the player's active weapon"""
@@ -144,3 +158,16 @@ class Player(object):
 
     def bottom_bound(self):
         return self.position['y'] + 36
+
+    def update_image(self):
+        if self.hit:
+            self.image_num += 4
+        else:
+            if self.direction == 'up':
+                self.image_num = 0
+            elif self.direction == 'down':
+                self.image_num = 3
+            elif self.direction == 'right':
+                self.image_num = 2
+            elif self.direction == 'left':
+                self.image_num = 1
