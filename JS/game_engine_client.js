@@ -7,13 +7,14 @@ $(document).ready(function(){
 
 	//Load the images that will be used in the game
 	var playerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0: east, 1: west, 2: north, 3: south
-	rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
-	new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
-	gridBugImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
-	audio = [new Audio(), new Audio(), new Audio(), new Audio(), new Audio(), new Audio()],
-	wallHorizontal = new Image(),
-	wallVertical = new Image(),
-	backgroundPattern = new Image();
+		otherPlayerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()],
+		rollerImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(),
+		new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: east, 2,3: west, 4,5: north, 6,7: south
+		gridBugImg = [new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image(), new Image()], //0,1: southwest/northeast, 2,3: northwest/southeast
+		audio = [new Audio(), new Audio(), new Audio(), new Audio(), new Audio(), new Audio()],
+		wallHorizontal = new Image(),
+		wallVertical = new Image(),
+		backgroundPattern = new Image();
 
 	playerImg[0].src = 'static/SPRITES/player/p1_stand_N.png';
 	playerImg[1].src = 'static/SPRITES/player/p1_stand_W.png';
@@ -23,6 +24,14 @@ $(document).ready(function(){
 	playerImg[5].src = 'static/SPRITES/player/p1_stand_hit_W.png';
 	playerImg[6].src = 'static/SPRITES/player/p1_stand_hit_E.png';
 	playerImg[7].src = 'static/SPRITES/player/p1_stand_hit_S.png';
+	otherPlayerImg[0].src = 'static/SPRITES/player/p2_stand_N.png';
+	otherPlayerImg[1].src = 'static/SPRITES/player/p2_stand_W.png';
+	otherPlayerImg[2].src = 'static/SPRITES/player/p2_stand_E.png';
+	otherPlayerImg[3].src = 'static/SPRITES/player/p2_stand_S.png';
+	otherPlayerImg[4].src = 'static/SPRITES/PLAYER/p2_stand_hit_N.png';
+	otherPlayerImg[5].src = 'static/SPRITES/PLAYER/p2_stand_hit_W.png';
+	otherPlayerImg[6].src = 'static/SPRITES/PLAYER/p2_stand_hit_E.png';
+	otherPlayerImg[7].src = 'static/SPRITES/PLAYER/p2_stand_hit_S.png';
 	rollerImg[0].src = 'static/SPRITES/roller/roller_E1.png';
 	rollerImg[1].src = 'static/SPRITES/roller/roller_E2.png';
 	rollerImg[2].src = 'static/SPRITES/roller/roller_W1.png';
@@ -436,21 +445,13 @@ $(document).ready(function(){
 		ws.onmessage = function(msg){
 			var data = JSON.parse(msg.data);
 			if(data.clientID){
-				console.log("Client id: " + data.clientID);
 				clientId = data.clientID;
 			}
 			if(data.message){
 				var message = data.message;
-				if(message == 'singlePlayerGame'){
-					console.log('single player game');
+				if(message == 'twoPlayerGame'){
 					var gameState = data.gameState,
-					numPlayers = 1;
-					//console.log(gameState);
-					playGame(numPlayers, gameState, ws);
-				}else if(message == 'twoPlayerGame'){
-					var gameState = data.gameState,
-					numPlayers = 2;
-					playGame(numPlayers, gameState, ws);
+					playGame(gameState, ws);
 				}
 			}
 		};
@@ -464,7 +465,6 @@ $(document).ready(function(){
 			setTimeout(function(){
 				ws.send(data);
 			}, 75);
-			console.log(data);
 		});
 
 		howToPlay.on('click', function(){
@@ -1188,13 +1188,8 @@ $(document).ready(function(){
 	/*
 	* Single player game function that controls running the game
 	*/
-	function playGame(numPlayers, gameState){
-		console.log('playing a game');
-		if(numPlayers == 1){
-			$('title').text('Single Player Game');
-		}else{
-			$('title').text('Two Player Game');
-		}
+	function playGame(gameState){
+		$('title').text('Two Player Game');
 
 		//variables used to control the sizing of the game display
 		var sizeFactor = window.innerWidth / 1366,
@@ -1378,17 +1373,14 @@ $(document).ready(function(){
 			fog[1] = new Kinetic.Rect({y: 0, height: playAreaHeight, fill: '#62403A'});
 			fog[2] = new Kinetic.Rect({y: 0, fill: '#62403A'});
 			fog[3] = new Kinetic.Rect({fill: '#62403A'});
-			fogLayer.add(fog[0]).add(fog[1]).add(fog[2]).add(fog[3]);
-			if(numPlayers == 2){
-				fog[4] = new Kinetic.Rect({fill: '#62403A'});
-				fog[5] = new Kinetic.Rect({fill: '#62403A'});
-				fog[6] = new Kinetic.Rect({fill: '#62403A'});
-				fog[7] = new Kinetic.Rect({fill: '#62403A'});
-				fog[8] = new Kinetic.Rect({fill: '#62403A'});
-				fog[9] = new Kinetic.Rect({fill: '#62403A'});
-				fog[10] = new Kinetic.Rect({fill: '#62403A'});
-				fogLayer.add(fog[4]).add(fog[5]).add(fog[6]).add(fog[7]).add(fog[8]).add(fog[9]).add(fog[10]);
-			}
+			fog[4] = new Kinetic.Rect({fill: '#62403A'});
+			fog[5] = new Kinetic.Rect({fill: '#62403A'});
+			fog[6] = new Kinetic.Rect({fill: '#62403A'});
+			fog[7] = new Kinetic.Rect({fill: '#62403A'});
+			fog[8] = new Kinetic.Rect({fill: '#62403A'});
+			fog[9] = new Kinetic.Rect({fill: '#62403A'});
+			fog[10] = new Kinetic.Rect({fill: '#62403A'});
+			fogLayer.add(fog[0]).add(fog[1]).add(fog[2]).add(fog[3]).add(fog[4]).add(fog[5]).add(fog[6]).add(fog[7]).add(fog[8]).add(fog[9]).add(fog[10]);
 
 			//adds the background color and border
 			var backGroundFill = new Kinetic.Rect({x: 0, y: 0, width: playAreaWidth, height: playAreaHeight, fillPatternImage: backgroundPattern, fillPatternRepeat: 'repeat' });
@@ -1410,20 +1402,17 @@ $(document).ready(function(){
 
 			//creates the player and adds him to the foreground
 			player = new createPlayer(gameState.player, 1);
-			foreground.add(player.obj);
+			otherPlayer = new createPlayer(gameState.otherPlayer, 2);
+			foreground.add(otherPlayer.obj)
+				.add(player.obj);
 
 			//add info stuff to info layer
-			infoLayer.add(player.healthBar);
-			infoLayer.add(player.healthBarBorder);
+			infoLayer.add(player.healthBar)
+				.add(player.healthBarBorder)
+				.add(otherPlayer.healthBar)
+				.add(otherPlayer.healthBarBorder);
          //   infoLayer.add(player.weaponBorder);
-
-			//creates the other player if it is a two player game
-			if(numPlayers == 2){
-				otherPlayer = new createPlayer(gameState.otherPlayer, 2);
-				foreground.add(otherPlayer.obj);
-				infoLayer.add(otherPlayer.healthBar)
-					.add(otherPlayer.healthBarBorder);
-			}
+			
 
 			//add the layers to the stage
 			stage.add(background).add(foreground).add(fogLayer).add(infoLayer);
@@ -1587,27 +1576,9 @@ $(document).ready(function(){
 		//function used to update the appearance of the fog based on the player's position
 		function updateFog(playerData, otherPlayerData){
 			var halfFog = fogSize/2,
-			halfWidth = width/2,
-			halfHeight = height/2,
-			left1,
-			right1,
-			top1,
-			bottom1,
-			left2,
-			right2,
-			top2,
-			bottom2;
-			if(!otherPlayerData){
-				left1 = playerData.x + imageSize/2 - halfFog;
-				right1 = playerData.x + imageSize/2 + halfFog;
-				top1 = playerData.y + imageSize/2 - halfFog;
-				bottom1 = playerData.y + imageSize/2 + halfFog;
-				fog[0].width(left1);
-				fog[1].x(right1).width(playAreaWidth - right1);
-				fog[2].x(left1).height(top1).width(right1 - left1);
-				fog[3].x(left1).y(bottom1).height(playAreaHeight - bottom1).width(right1 - left1);
-			}else{
-				var left1 = playerData.x+ imageSize/2 - halfFog,
+				halfWidth = width/2,
+				halfHeight = height/2,
+				left1 = playerData.x+ imageSize/2 - halfFog,
 				right1 = playerData.x+ imageSize/2 + halfFog,
 				top1 = playerData.y + imageSize/2 - halfFog,
 				bottom1 = playerData.y + imageSize/2 + halfFog,
@@ -1619,82 +1590,81 @@ $(document).ready(function(){
 				horizontal = [],
 				verticalOverlap = false,
 				horizontalOverlap = false;
-				if(left1 < left2){
-					horizontal[0] = left1;
-					horizontal[3] = right2;
-					if(right1 < left2){
-						horizontal[1] = right1;
-						horizontal[2] = left2;
-					}else{
-						horizontal[1] = left2;
-						horizontal[2] = right1;
-						horizontalOverlap = true;
-					}
+			if(left1 < left2){
+				horizontal[0] = left1;
+				horizontal[3] = right2;
+				if(right1 < left2){
+					horizontal[1] = right1;
+					horizontal[2] = left2;
 				}else{
-					horizontal[0] = left2;
-					horizontal[3] = right1;
-					if(right2 < left1){
-						horizontal[1] = right2;
-						horizontal[2] = left1;
-					}else{
-						horizontal[1] = left1;
-						horizontal[2] = right2;
-						horizontalOverlap = true;
-					}
+					horizontal[1] = left2;
+					horizontal[2] = right1;
+					horizontalOverlap = true;
 				}
-				if(top1 < top2){
-					vertical[0] = top1;
-					vertical[3] = bottom2;
-					if(bottom1 < top2){
-						vertical[1] = bottom1;
-						vertical[2] = top2;
-					}else{
-						vertical[1] = top2;
-						vertical[2] = bottom1;
-						verticalOverlap = true;
-					}
+			}else{
+				horizontal[0] = left2;
+				horizontal[3] = right1;
+				if(right2 < left1){
+					horizontal[1] = right2;
+					horizontal[2] = left1;
 				}else{
-					vertical[0] = top2;
-					vertical[3] = bottom1;
-					if(bottom2 < top1){
-						vertical[1] = bottom2;
-						vertical[2] = top1;
-					}else{
-						vertical[1] = top1;
-						vertical[2] = bottom2;
-						verticalOverlap = true;
-					}
+					horizontal[1] = left1;
+					horizontal[2] = right2;
+					horizontalOverlap = true;
 				}
-				fog[0].width(horizontal[0]);
-				fog[1].x(horizontal[3]).width(playAreaWidth - horizontal[3]);
-				fog[2].x(horizontal[0]).height(vertical[0]).width(horizontal[3] - horizontal[0]);
-				fog[3].x(horizontal[0]).y(vertical[3]).height(playAreaHeight - vertical[3]).width(horizontal[3] - horizontal[0])
-				if(!verticalOverlap || !horizontalOverlap){
-					fog[6].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
+			}
+			if(top1 < top2){
+				vertical[0] = top1;
+				vertical[3] = bottom2;
+				if(bottom1 < top2){
+					vertical[1] = bottom1;
+					vertical[2] = top2;
 				}else{
-					fog[6].hide();
+					vertical[1] = top2;
+					vertical[2] = bottom1;
+					verticalOverlap = true;
 				}
-				if(!verticalOverlap){
-					fog[5].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
-					fog[7].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
+			}else{
+				vertical[0] = top2;
+				vertical[3] = bottom1;
+				if(bottom2 < top1){
+					vertical[1] = bottom2;
+					vertical[2] = top1;
 				}else{
-					fog[5].hide();
-					fog[7].hide();
+					vertical[1] = top1;
+					vertical[2] = bottom2;
+					verticalOverlap = true;
 				}
-				if(!horizontalOverlap){
-					fog[4].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[0]).height(vertical[1] - vertical[0]).show();
-					fog[8].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[2]).height(vertical[3] - vertical[2]).show();
-				}else{
-					fog[4].hide();
-					fog[8].hide();
-				}
-				if(left1 < left2 && top1 < top2 || left2 < left1 && top2 < top1){
-					fog[9].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[2]).height(vertical[3] - vertical[2]);
-					fog[10].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[0]).height(vertical[1] - vertical[0]);
-				}else{
-					fog[9].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[2]).height(vertical[3] - vertical[2]);
-					fog[10].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[0]).height(vertical[1] - vertical[0]);
-				}
+			}
+			fog[0].width(horizontal[0]);
+			fog[1].x(horizontal[3]).width(playAreaWidth - horizontal[3]);
+			fog[2].x(horizontal[0]).height(vertical[0]).width(horizontal[3] - horizontal[0]);
+			fog[3].x(horizontal[0]).y(vertical[3]).height(playAreaHeight - vertical[3]).width(horizontal[3] - horizontal[0])
+			if(!verticalOverlap || !horizontalOverlap){
+				fog[6].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
+			}else{
+				fog[6].hide();
+			}
+			if(!verticalOverlap){
+				fog[5].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
+				fog[7].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[1]).height(vertical[2] - vertical[1]).show();
+			}else{
+				fog[5].hide();
+				fog[7].hide();
+			}
+			if(!horizontalOverlap){
+				fog[4].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[0]).height(vertical[1] - vertical[0]).show();
+				fog[8].x(horizontal[1]).width(horizontal[2] - horizontal[1]).y(vertical[2]).height(vertical[3] - vertical[2]).show();
+			}else{
+				fog[4].hide();
+				fog[8].hide();
+			}
+			if(left1 < left2 && top1 < top2 || left2 < left1 && top2 < top1){
+				fog[9].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[2]).height(vertical[3] - vertical[2]);
+				fog[10].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[0]).height(vertical[1] - vertical[0]);
+			}else{
+				fog[9].x(horizontal[2]).width(horizontal[3] - horizontal[2]).y(vertical[2]).height(vertical[3] - vertical[2]);
+				fog[10].x(horizontal[0]).width(horizontal[1] - horizontal[0]).y(vertical[0]).height(vertical[1] - vertical[0]);
 			}
 		};
 
@@ -1801,7 +1771,6 @@ $(document).ready(function(){
 
 		ws.onmessage = function(msg){
 			var data = JSON.parse(msg.data);
-			//console.log(data);
 			if(data.message == 'updateState'){
 				if(levelComplete.isVisible()){
 					levelComplete.hide();
@@ -1811,12 +1780,9 @@ $(document).ready(function(){
 				enemyData = gameState.enemyData,
 				bulletData = gameState.bulletData,
 				playerData = gameState.playerData,
-				otherPlayerData;
+				otherPlayerData = gameState.otherPlayerData;
 				updatePlayer(playerData, player);
-				if(numPlayers == 2){
-					otherPlayerData = gameState.otherPlayerData;
-					updatePlayer(otherPlayerData, otherPlayer);
-				}
+				updatePlayer(otherPlayerData, otherPlayer);
 				updateFog(playerData, otherPlayerData);
 				bulletGroup.destroyChildren();
 				enemyGroup.destroyChildren();
