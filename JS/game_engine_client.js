@@ -450,7 +450,7 @@ $(document).ready(function(){
 			if(data.message){
 				var message = data.message;
 				if(message == 'twoPlayerGame'){
-					var gameState = data.gameState,
+					var gameState = data.gameState;
 					playGame(gameState, ws);
 				}
 			}
@@ -1520,7 +1520,7 @@ $(document).ready(function(){
 
 		//increments the player's position based on the players current position, change of position, and timestep amount
 		//also updates the position/clip of the foreground/background
-		function updatePlayer(playerData, player){
+		function updatePlayer(playerData, player, playerNum){
 			var xpos = playerData.x,
 			originalX = width/2 - imageSize/2,
 			clipX,
@@ -1567,7 +1567,14 @@ $(document).ready(function(){
 			foreground.clipY(clipY);
 			background.y(posY);
 			background.clipY(clipY);
-			player.obj.image(playerImg[playerData.imgNum]);
+            if (playerNum == 2)
+            {
+                player.obj.image(playerImg[playerData.imgNum]);
+            }
+            else
+            {
+                player.obj.image(otherPlayerImg[playerData.imgNum]);
+            }
 			player.healthBar.width(150 * playerData.health / player.maxHp * sizeFactor);
 
             //player.currentWeapon(playerData.pistol);
@@ -1781,8 +1788,8 @@ $(document).ready(function(){
 				bulletData = gameState.bulletData,
 				playerData = gameState.playerData,
 				otherPlayerData = gameState.otherPlayerData;
-				updatePlayer(playerData, player);
-				updatePlayer(otherPlayerData, otherPlayer);
+				updatePlayer(playerData, player, 1);
+				updatePlayer(otherPlayerData, otherPlayer, 2);
 				updateFog(playerData, otherPlayerData);
 				bulletGroup.destroyChildren();
 				enemyGroup.destroyChildren();
